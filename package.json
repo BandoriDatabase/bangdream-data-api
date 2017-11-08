@@ -1,0 +1,47 @@
+{
+  "name": "bangdream-data-api",
+  "version": "0.1.0",
+  "description": "Bandori Database Public API Project",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "cross-env ALLOW_API_KEY='testkey' nodemon index.js",
+    "test": "eslint src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BandoriDatabase/bangdream-data-api.git"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/BandoriDatabase/bangdream-data-api/issues"
+  },
+  "homepage": "https://github.com/BandoriDatabase/bangdream-data-api#readme",
+  "dependencies": {
+    "@koa/cors": "^2.2.1",
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "glob": "^7.1.2",
+    "isomorphic-fetch": "^2.2.1",
+    "koa": "^2.3.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-logger": "^3.1.0",
+    "koa-router": "^7.2.1",
+    "koa-send": "^4.1.1",
+    "koa2-swagger-ui": "^2.6.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.0.1",
+    "babel-preset-env": "^1.6.1",
+    "chai": "^4.1.2",
+    "cross-env": "^5.1.1",
+    "eslint": "^4.10.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "mocha": "^4.0.1",
+    "nodemon": "^1.12.1"
+  }
+}
