@@ -15,6 +15,7 @@ if (!process.env.ALLOW_API_KEY) {
 // download masterdb if it is not present, then force reload
 if (!fs.existsSync(masDBAddr)) {
   console.log('no masterdb found, fetching one...');
+  global.isFirstStart = true;
   fetch('https://res.bangdream.ga/static/MasterDB.json')
     .then(res => res.text())
     .then((res) => {

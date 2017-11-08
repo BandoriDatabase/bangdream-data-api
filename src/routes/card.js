@@ -1,9 +1,10 @@
 import Router from 'koa-router';
-import { apiBase, masterdb, pageLimit } from '../config';
+import { apiBase, masDBAddr, pageLimit } from '../config';
 import mapToList from '../utils/mapToList';
 
 const api = 'card';
 const router = new Router();
+const masterdb = require(masDBAddr);
 const cardList = mapToList(masterdb.cardInfos.entries).reverse();
 
 router.prefix(`${apiBase}/${api}`);

@@ -1,9 +1,10 @@
 import Router from 'koa-router';
-import { apiBase, masterdb, pageLimit } from '../config';
+import { apiBase, masDBAddr, pageLimit } from '../config';
 // import mapToList from '../utils/mapToList';
 
 const api = 'music';
 const router = new Router();
+const masterdb = require(masDBAddr);
 const musicList = masterdb.musicList.entries;
 const musicDiffiList = masterdb.musicDifficultyList.entries;
 

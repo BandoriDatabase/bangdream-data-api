@@ -1,8 +1,9 @@
 import Router from 'koa-router';
-import { apiBase, masterdb } from '../config';
+import { apiBase, masDBAddr } from '../config';
 
 const api = 'sfc';
 const router = new Router();
+const masterdb = require(masDBAddr);
 const singleFCList = masterdb.singleFrameCartoonList.entries;
 
 router.prefix(`${apiBase}/${api}`);

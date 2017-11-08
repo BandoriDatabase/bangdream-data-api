@@ -1,9 +1,10 @@
 import Router from 'koa-router';
-import { apiBase, masterdb, pageLimit } from '../config';
+import { apiBase, masDBAddr, pageLimit } from '../config';
 import mapToList from '../utils/mapToList';
 
 const api = 'chara';
 const router = new Router();
+const masterdb = require(masDBAddr);
 const charaList = mapToList(masterdb.characterInfoMap.entries);
 
 router.prefix(`${apiBase}/${api}`);

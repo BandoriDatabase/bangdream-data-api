@@ -1,9 +1,10 @@
 import Router from 'koa-router';
-import { apiBase, masterdb, pageLimit } from '../config';
+import { apiBase, masDBAddr, pageLimit } from '../config';
 import mapToList from '../utils/mapToList';
 
 const api = 'gacha';
 const router = new Router();
+const masterdb = require(masDBAddr);
 const gachaList = mapToList(masterdb.gachaMap.entries).reverse();
 
 router.prefix(`${apiBase}/${api}`);

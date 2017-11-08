@@ -31,15 +31,17 @@ app.use(async (ctx, next) => {
   }
 });
 
-routesLoader(`${__dirname}/routes`).then((files) => {
-  files.forEach((route) => {
-    app
-      .use(route.routes())
-      .use(route.allowedMethods({
-        throw: true,
-      }));
+if (!global.isFirstStart) {
+  routesLoader(`${__dirname}/routes`).then((files) => {
+    files.forEach((route) => {
+      app
+        .use(route.routes())
+        .use(route.allowedMethods({
+          throw: true,
+        }));
+    });
   });
-});
+}
 
 app.listen(
   port,

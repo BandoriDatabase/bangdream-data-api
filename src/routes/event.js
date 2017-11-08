@@ -1,9 +1,10 @@
 import Router from 'koa-router';
-import { apiBase, masterdb } from '../config';
+import { apiBase, masDBAddr } from '../config';
 import mapToList from '../utils/mapToList';
 
 const api = 'event';
 const router = new Router();
+const masterdb = require(masDBAddr);
 const currentEvent = mapToList(masterdb.eventMap.entries).find(elem => elem.enableFlag);
 if (currentEvent.eventType === 'challenge') {
   currentEvent.detail = masterdb.challengeEventDetailMap.entries[currentEvent.eventId];

@@ -1,8 +1,9 @@
 import Router from 'koa-router';
-import { apiBase, masterdb } from '../config';
+import { apiBase, masDBAddr } from '../config';
 
 const api = 'version';
 const router = new Router();
+const masterdb = require(masDBAddr);
 
 router.prefix(`${apiBase}/${api}`);
 
