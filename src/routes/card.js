@@ -13,19 +13,23 @@ const cardMap = {
   jp: dbJP.cardInfos.entries,
   tw: dbTW.cardInfos.entries,
 };
+const skillMap = {
+  jp: dbJP.skillMap.entries,
+  tw: dbTW.skillMap.entries,
+};
 
 router.prefix(`${apiBase}/${api}`);
 
 function addMaxParams(card, isDelParamMap) {
-  const maxLv = Object.keys(card.parameterMap).slice(-1)[0];
+  const maxLv = Number(Object.keys(card.parameterMap).slice(-1)[0]);
   return Object.assign({}, card, {
     maxLevel: maxLv,
     maxPerformance: card.parameterMap[maxLv].performance,
     maxTechnique: card.parameterMap[maxLv].technique,
     maxVisual: card.parameterMap[maxLv].visual,
-    totalMaxParam: String(Number(card.parameterMap[maxLv].performance) +
+    totalMaxParam: Number(card.parameterMap[maxLv].performance) +
       Number(card.parameterMap[maxLv].technique) +
-      Number(card.parameterMap[maxLv].visual)),
+      Number(card.parameterMap[maxLv].visual),
   }, {
     parameterMap: isDelParamMap ? undefined : card.parameterMap,
   });
@@ -54,6 +58,7 @@ router.get('/', async (ctx, next) => {
     attr: card.attr,
     rarity: card.rarity,
     parameterMap: card.parameterMap,
+    skill: skillMap[ctx.params.server][card.cardId],
   }));
   ctx.body = ctx.body.map(card => addMaxParams(card, true));
   if (ctx.query.rarity) {

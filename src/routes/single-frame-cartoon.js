@@ -13,7 +13,7 @@ router.prefix(`${apiBase}/${api}`);
 
 router.get('/', async (ctx, next) => {
   ctx.body = singleFCList[ctx.params.server].map((elem) => {
-    elem.assetAddress = `/assets/loading/downloading_${elem.assetBundleName}.png`;
+    elem.assetAddress = `/assets-${ctx.params.server}/loading/downloading_${elem.assetBundleName}.png`;
     return elem;
   });
   ctx.body = {
@@ -26,6 +26,7 @@ router.get('/', async (ctx, next) => {
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
   try {
     ctx.body = singleFCList[ctx.params.server].find(sfc => sfc.singleFrameCartoonId === Number(ctx.params.id));
+    ctx.body.assetAddress = `/assets-${ctx.params.server}/loading/downloading_${ctx.body.assetBundleName}.png`;
   } catch (error) {
     ctx.throw(400, 'music not exists');
   } finally {

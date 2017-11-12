@@ -9,6 +9,10 @@ const skillMapList = {
   jp: mapToList(dbJP.skillMap.entries),
   tw: mapToList(dbTW.skillMap.entries),
 };
+const skillMap = {
+  jp: dbJP.skillMap.entries,
+  tw: dbTW.skillMap.entries,
+};
 const skillList = {
   jp: dbJP.skillList.entries,
   tw: dbTW.skillList.entries,
@@ -35,7 +39,7 @@ router.get('/', async (ctx, next) => {
 
 router.get('/cardId/:cardId(\\d{1,4})', async (ctx, next) => {
   try {
-    ctx.body = skillMapList[ctx.params.server].find(skill => skill.cardId === Number(ctx.params.cardId));
+    ctx.body = skillMap[ctx.params.server][ctx.params.cardId];
     ctx.body.skillDetail = skillList[ctx.params.server]
       .filter(skill => skill.skillId === ctx.body.skillId);
     if (skillActivateEffectList[ctx.params.server]) {

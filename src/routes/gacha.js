@@ -13,6 +13,10 @@ const gachaMap = {
   jp: dbJP.gachaMap.entries,
   tw: dbTW.gachaMap.entries,
 };
+const gachaInformationMap = {
+  jp: dbJP.gachaInformationMap.entries,
+  // tw: dbTW.gachaInformationMap.entries,
+};
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -40,10 +44,15 @@ router.get('/', async (ctx, next) => {
 });
 
 router.get('/current', async (ctx, next) => {
-  ctx.body = gachaList
+  ctx.body = gachaList[ctx.params.server]
     .filter(elem => Number(elem.publishedAt) < Date.now() &&
       Number(elem.closedAt) > Date.now() &&
       elem.closedAt.substring(0, 1) !== '4');
+  if (ctx.params.server === 'jp') {
+    ctx.body = ctx.body.map(gacha => Object.assign({}, gacha, {
+      information: gachaInformationMap[ctx.params.server][gacha.gachaId],
+    }));
+  }
   ctx.body = {
     totalCount: ctx.body.length,
     data: ctx.body,
@@ -53,7 +62,8 @@ router.get('/current', async (ctx, next) => {
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
   try {
-    ctx.body = gachaMap.entries[ctx.params.id];
+    ctx.body = gachaMap[ctx.params.server][ctx.params.id];
+    ctx.body.information = gachaInformationMap[ctx.params.server][ctx.params.id];
   } catch (error) {
     ctx.throw(400, 'degree not exists');
   } finally {

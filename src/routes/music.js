@@ -6,8 +6,8 @@ import { dbJP, dbTW } from '../db';
 const api = 'music';
 const router = new Router();
 const musicList = {
-  jp: dbJP.musicList.entries,
-  tw: dbTW.musicList.entries,
+  jp: dbJP.musicList.entries.slice().reverse(),
+  tw: dbTW.musicList.entries.slice().reverse(),
 };
 const musicDiffiList = {
   jp: dbJP.musicDifficultyList.entries,
@@ -42,6 +42,7 @@ router.get('/', async (ctx, next) => {
     title: music.title,
     bandId: music.bandId,
     tag: music.tag,
+    bandName: bandMap[ctx.params.server][music.bandId].bandName,
   }));
   if (ctx.query.bandId) {
     ctx.body = ctx.body
@@ -57,7 +58,8 @@ router.get('/', async (ctx, next) => {
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
   try {
     ctx.body = musicList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
-    ctx.body.difficulty = musicDiffiList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
+    ctx.body.difficulty = musicDiffiList[ctx.params.server].filter(elem => elem.musicId === Number(ctx.params.id));
+    ctx.body.combo = ctx.body.difficulty[0].combo;
     ctx.body.bandName = bandMap[ctx.params.server][ctx.body.bandId].bandName;
   } catch (error) {
     console.log(error);
