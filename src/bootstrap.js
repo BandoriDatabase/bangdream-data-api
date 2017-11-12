@@ -3,8 +3,10 @@
  */
 
 import fs from 'fs';
-import fetch from 'isomorphic-fetch';
 import { masDBAddr } from './config';
+import downloadDB from './utils/downloadDB';
+
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 // make sure necessary env variables
 if (!process.env.ALLOW_API_KEY) {
@@ -13,14 +15,8 @@ if (!process.env.ALLOW_API_KEY) {
 }
 
 // download masterdb if it is not present, then force reload
-if (!fs.existsSync(masDBAddr)) {
+if (!fs.existsSync(masDBAddr.jp) || !fs.existsSync(masDBAddr.tw)) {
   console.log('no masterdb found, fetching one...');
   global.isFirstStart = true;
-  fetch('https://res.bangdream.ga/static/MasterDB.json')
-    .then(res => res.text())
-    .then((res) => {
-      fs.writeFileSync(masDBAddr, res);
-      console.log('got a new masterdb, please restart server');
-      process.exit(1);
-    });
+  downloadDB();
 }

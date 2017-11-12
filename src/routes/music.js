@@ -1,12 +1,22 @@
 import Router from 'koa-router';
-import { apiBase, masDBAddr, pageLimit } from '../config';
+import { apiBase, pageLimit } from '../config';
+import { dbJP, dbTW } from '../db';
 // import mapToList from '../utils/mapToList';
 
 const api = 'music';
 const router = new Router();
-const masterdb = require(masDBAddr);
-const musicList = masterdb.musicList.entries;
-const musicDiffiList = masterdb.musicDifficultyList.entries;
+const musicList = {
+  jp: dbJP.musicList.entries,
+  tw: dbTW.musicList.entries,
+};
+const musicDiffiList = {
+  jp: dbJP.musicDifficultyList.entries,
+  tw: dbTW.musicDifficultyList.entries,
+};
+const bandMap = {
+  jp: dbJP.bandMap.entries,
+  tw: dbTW.bandMap.entries,
+};
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -22,11 +32,11 @@ router.get('/', async (ctx, next) => {
   ) {
     ctx.throw(400, 'wrong query param type');
   }
-  if (limit * (page - 1) > musicList.length || limit > pageLimit) {
+  if (limit * (page - 1) > musicList[ctx.params.server].length || limit > pageLimit) {
     ctx.throw(400, 'query length exceed limit');
   }
-  ctx.body = musicList.map(music => ({
-    id: music.id,
+  ctx.body = musicList[ctx.params.server].map(music => ({
+    musicId: music.musicId,
     bgmFile: `/assets/sound/${music.bgmId}.mp3`,
     jacket: `/assets/musicjacket/${music.jacketImage}_jacket.png`,
     title: music.title,
@@ -45,10 +55,16 @@ router.get('/', async (ctx, next) => {
 });
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
-  ctx.body = musicList.find(elem => elem.id === ctx.params.id);
-  ctx.body.difficulty = musicDiffiList.find(elem => elem.musicId === ctx.params.id);
-  ctx.body.bandName = masterdb.bandMap.entries[ctx.body.bandId].bandName;
-  await next();
+  try {
+    ctx.body = musicList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
+    ctx.body.difficulty = musicDiffiList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
+    ctx.body.bandName = bandMap[ctx.params.server][ctx.body.bandId].bandName;
+  } catch (error) {
+    console.log(error);
+    ctx.throw(400, 'music not exists');
+  } finally {
+    await next();
+  }
 });
 
 export default router;

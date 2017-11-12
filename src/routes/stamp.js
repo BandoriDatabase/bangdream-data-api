@@ -1,11 +1,18 @@
 import Router from 'koa-router';
-import { apiBase, masDBAddr, pageLimit } from '../config';
+import { apiBase, pageLimit } from '../config';
+import { dbJP, dbTW } from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'stamp';
 const router = new Router();
-const masterdb = require(masDBAddr);
-const stampList = mapToList(masterdb.stampMap.entries).reverse();
+const stampList = {
+  jp: mapToList(dbJP.stampMap.entries),
+  tw: mapToList(dbTW.stampMap.entries),
+};
+const stampMap = {
+  jp: dbJP.stampMap.entries,
+  tw: dbTW.stampMap.entries,
+};
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -21,10 +28,10 @@ router.get('/', async (ctx, next) => {
   ) {
     ctx.throw(400, 'wrong query param type');
   }
-  if (limit * (page - 1) > stampList.length || limit > pageLimit) {
+  if (limit * (page - 1) > stampList[ctx.params.server].length || limit > pageLimit) {
     ctx.throw(400, 'query length exceed limit');
   }
-  ctx.body = stampList;
+  ctx.body = stampList[ctx.params.server];
   ctx.body = {
     totalCount: ctx.body.length,
     data: ctx.body.slice((page - 1) * limit, page * limit),
@@ -33,8 +40,13 @@ router.get('/', async (ctx, next) => {
 });
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
-  ctx.body = masterdb.stampMap.entries[ctx.params.id];
-  await next();
+  try {
+    ctx.body = stampMap[ctx.params.server][ctx.params.id];
+  } catch (error) {
+    ctx.throw(400, 'skill not exists');
+  } finally {
+    await next();
+  }
 });
 
 export default router;

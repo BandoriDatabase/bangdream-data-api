@@ -1,11 +1,18 @@
 import Router from 'koa-router';
-import { apiBase, masDBAddr, pageLimit } from '../config';
+import { apiBase, pageLimit } from '../config';
+import { dbJP, dbTW } from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'gacha';
 const router = new Router();
-const masterdb = require(masDBAddr);
-const gachaList = mapToList(masterdb.gachaMap.entries).reverse();
+const gachaList = {
+  jp: mapToList(dbJP.gachaMap.entries),
+  tw: mapToList(dbTW.gachaMap.entries),
+};
+const gachaMap = {
+  jp: dbJP.gachaMap.entries,
+  tw: dbTW.gachaMap.entries,
+};
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -21,10 +28,10 @@ router.get('/', async (ctx, next) => {
   ) {
     ctx.throw(400, 'wrong query param type');
   }
-  if (limit * (page - 1) > gachaList.length || limit > pageLimit) {
+  if (limit * (page - 1) > gachaList[ctx.params.server].length || limit > pageLimit) {
     ctx.throw(400, 'query length exceed limit');
   }
-  ctx.body = gachaList;
+  ctx.body = gachaList[ctx.params.server];
   ctx.body = {
     totalCount: ctx.body.length,
     data: ctx.body.slice((page - 1) * limit, page * limit),
@@ -45,8 +52,13 @@ router.get('/current', async (ctx, next) => {
 });
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
-  ctx.body = masterdb.gachaMap.entries[ctx.params.id];
-  await next();
+  try {
+    ctx.body = gachaMap.entries[ctx.params.id];
+  } catch (error) {
+    ctx.throw(400, 'degree not exists');
+  } finally {
+    await next();
+  }
 });
 
 export default router;

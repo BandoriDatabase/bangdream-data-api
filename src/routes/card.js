@@ -1,11 +1,18 @@
 import Router from 'koa-router';
-import { apiBase, masDBAddr, pageLimit } from '../config';
+import { apiBase, pageLimit } from '../config';
+import { dbJP, dbTW } from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'card';
 const router = new Router();
-const masterdb = require(masDBAddr);
-const cardList = mapToList(masterdb.cardInfos.entries).reverse();
+const cardList = {
+  jp: mapToList(dbJP.cardInfos.entries).reverse(),
+  tw: mapToList(dbTW.cardInfos.entries).reverse(),
+};
+const cardMap = {
+  jp: dbJP.cardInfos.entries,
+  tw: dbTW.cardInfos.entries,
+};
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -36,10 +43,10 @@ router.get('/', async (ctx, next) => {
   ) {
     ctx.throw(400, 'wrong query param type');
   }
-  if (limit * (page - 1) > cardList.length || limit > pageLimit) {
+  if (limit * (page - 1) > cardList[ctx.params.server].length || limit > pageLimit) {
     ctx.throw(400, 'query length exceed limit');
   }
-  ctx.body = cardList.map(card => ({
+  ctx.body = cardList[ctx.params.server].map(card => ({
     characterId: card.characterId,
     cardId: card.cardId,
     title: card.title,
@@ -69,8 +76,13 @@ router.get('/', async (ctx, next) => {
 });
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
-  ctx.body = addMaxParams(masterdb.cardInfos.entries[ctx.params.id]);
-  await next();
+  try {
+    ctx.body = addMaxParams(cardMap[ctx.params.server][ctx.params.id]);
+  } catch (error) {
+    ctx.throw(400, 'card not exists');
+  } finally {
+    await next();
+  }
 });
 
 export default router;

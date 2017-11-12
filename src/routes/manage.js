@@ -1,7 +1,6 @@
 import Router from 'koa-router';
-import fs from 'fs';
-import fetch from 'isomorphic-fetch';
-import { apiBase, masDBAddr } from '../config';
+import { apiBase } from '../config';
+import downloadDB from '../utils/downloadDB';
 
 const api = 'manage';
 const router = new Router();
@@ -16,14 +15,7 @@ router.get('/reload', async (ctx) => {
   }
   // get new masterdb
   console.log('start updating masterdb');
-  fetch('https://res.bangdream.ga/static/MasterDB.json')
-    .then(res => res.text())
-    .then((res) => {
-      fs.writeFileSync(masDBAddr, res);
-      console.log('got a new masterdb, please restart server');
-      // exit for auto reload, use with supervisord or similar tools
-      process.exit(1);
-    });
+  downloadDB();
   ctx.body = 'succeed';
 });
 

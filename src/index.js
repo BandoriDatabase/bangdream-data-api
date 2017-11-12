@@ -12,8 +12,11 @@ require('./bootstrap');
 
 const app = new Koa();
 
+if (process.env.NODE_ENV === 'development') {
+  app.use(logger());
+}
+
 app
-  .use(logger())
   .use(bodyParser())
   .use(cors());
 

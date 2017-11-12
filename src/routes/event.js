@@ -1,26 +1,48 @@
 import Router from 'koa-router';
-import { apiBase, masDBAddr } from '../config';
+import { apiBase } from '../config';
+import { dbJP, dbTW } from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'event';
 const router = new Router();
-const masterdb = require(masDBAddr);
-const currentEvent = mapToList(masterdb.eventMap.entries).find(elem => elem.enableFlag);
-if (currentEvent.eventType === 'challenge') {
-  currentEvent.detail = masterdb.challengeEventDetailMap.entries[currentEvent.eventId];
+const currentEvent = {
+  jp: mapToList(dbJP.eventMap.entries).find(elem => elem.enableFlag),
+  tw: mapToList(dbTW.eventMap.entries).find(elem => elem.enableFlag),
+};
+if (currentEvent.jp.eventType === 'challenge') {
+  currentEvent.jp.detail = dbJP.challengeEventDetailMap.entries[currentEvent.eventId];
+} else if (currentEvent.jp.eventType === 'story') {
+  currentEvent.jp.detail = dbJP.storyEventMap.entries[currentEvent.eventId];
+} else if (currentEvent.jp.eventType === 'versus') {
+  currentEvent.jp.detail = dbJP.versusEventMap.entries[currentEvent.eventId];
 }
-const eventBadgeList = mapToList(masterdb.eventBadgeMap.entries);
+if (currentEvent.tw.eventType === 'challenge') {
+  currentEvent.tw.detail = dbTW.challengeEventDetailMap.entries[currentEvent.eventId];
+} else if (currentEvent.tw.eventType === 'story') {
+  currentEvent.tw.detail = dbTW.storyEventMap.entries[currentEvent.eventId];
+} else if (currentEvent.tw.eventType === 'versus') {
+  currentEvent.tw.detail = dbTW.versusEventMap.entries[currentEvent.eventId];
+}
+const eventBadgeList = {
+  jp: mapToList(dbJP.eventBadgeMap.entries),
+  tw: mapToList(dbTW.eventBadgeMap.entries),
+};
 
 router.prefix(`${apiBase}/${api}`);
 
 router.get('/', async (ctx, next) => {
-  ctx.body = currentEvent;
+  ctx.body = currentEvent[ctx.params.server];
   await next();
 });
 
 router.get('/badge/:id(\\d{1,4})', async (ctx, next) => {
-  ctx.body = eventBadgeList.find(elem => elem.eventId === ctx.params.id);
-  await next();
+  try {
+    ctx.body = eventBadgeList[ctx.params.server].find(elem => elem.eventId === Number(ctx.params.id));
+  } catch (error) {
+    ctx.throw(400, 'event badge not exists');
+  } finally {
+    await next();
+  }
 });
 
 export default router;

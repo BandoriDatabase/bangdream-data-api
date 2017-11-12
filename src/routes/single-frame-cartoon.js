@@ -1,15 +1,18 @@
 import Router from 'koa-router';
-import { apiBase, masDBAddr } from '../config';
+import { apiBase } from '../config';
+import { dbJP, dbTW } from '../db';
 
 const api = 'sfc';
 const router = new Router();
-const masterdb = require(masDBAddr);
-const singleFCList = masterdb.singleFrameCartoonList.entries;
+const singleFCList = {
+  jp: dbJP.singleFrameCartoonList.entries,
+  tw: dbTW.singleFrameCartoonList.entries,
+};
 
 router.prefix(`${apiBase}/${api}`);
 
 router.get('/', async (ctx, next) => {
-  ctx.body = singleFCList.map((elem) => {
+  ctx.body = singleFCList[ctx.params.server].map((elem) => {
     elem.assetAddress = `/assets/loading/downloading_${elem.assetBundleName}.png`;
     return elem;
   });
@@ -21,8 +24,13 @@ router.get('/', async (ctx, next) => {
 });
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
-  ctx.body = singleFCList.find(sfc => sfc.singleFrameCartoonId === ctx.params.id);
-  await next();
+  try {
+    ctx.body = singleFCList[ctx.params.server].find(sfc => sfc.singleFrameCartoonId === Number(ctx.params.id));
+  } catch (error) {
+    ctx.throw(400, 'music not exists');
+  } finally {
+    await next();
+  }
 });
 
 export default router;

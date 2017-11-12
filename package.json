@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "dev": "cross-env ALLOW_API_KEY='testkey' nodemon index.js",
+    "dev": "cross-env ALLOW_API_KEY=testkey NODE_ENV=development nodemon index.js",
     "test": "eslint src/"
   },
   "repository": {
@@ -24,6 +24,7 @@
     "@koa/cors": "^2.2.1",
     "babel-polyfill": "^6.26.0",
     "babel-register": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "glob": "^7.1.2",
     "isomorphic-fetch": "^2.2.1",
     "koa": "^2.3.0",
@@ -35,7 +36,6 @@
   },
   "devDependencies": {
     "babel-eslint": "^8.0.1",
-    "babel-preset-env": "^1.6.1",
     "chai": "^4.1.2",
     "cross-env": "^5.1.1",
     "eslint": "^4.10.0",
