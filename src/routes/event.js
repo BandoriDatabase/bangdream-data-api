@@ -6,8 +6,14 @@ import mapToList from '../utils/mapToList';
 const api = 'event';
 const router = new Router();
 const currentEvent = {
-  jp: mapToList(dbJP.eventMap.entries).find(elem => elem.enableFlag),
-  tw: mapToList(dbTW.eventMap.entries).find(elem => elem.enableFlag),
+  jp: mapToList(dbJP.eventMap.entries)
+    .find(elem => elem.enableFlag &&
+      Number(elem.publicStartAt) < Date.now() &&
+      Number(elem.publicEndAt) > Date.now()),
+  tw: mapToList(dbTW.eventMap.entries)
+    .find(elem => elem.enableFlag &&
+      Number(elem.publicStartAt) < Date.now() &&
+      Number(elem.publicEndAt) > Date.now()),
 };
 if (currentEvent.jp.eventType === 'challenge') {
   currentEvent.jp.detail = dbJP.challengeEventDetailMap.entries[currentEvent.jp.eventId];
