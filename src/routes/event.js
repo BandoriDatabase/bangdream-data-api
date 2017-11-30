@@ -15,14 +15,18 @@ const currentEvent = {
       Number(elem.publicStartAt) < Date.now() &&
       Number(elem.publicEndAt) > Date.now()),
 };
-if (currentEvent.jp.eventType === 'challenge') {
+if (!currentEvent.jp) {
+  console.log('no current jp event, database must be wrong');
+} else if (currentEvent.jp.eventType === 'challenge') {
   currentEvent.jp.detail = dbJP.challengeEventDetailMap.entries[currentEvent.jp.eventId];
 } else if (currentEvent.jp.eventType === 'story') {
   currentEvent.jp.detail = dbJP.storyEventMap.entries[currentEvent.jp.eventId];
 } else if (currentEvent.jp.eventType === 'versus') {
   currentEvent.jp.detail = dbJP.versusEventMap.entries[currentEvent.jp.eventId];
 }
-if (currentEvent.tw.eventType === 'challenge') {
+if (!currentEvent.tw) {
+  console.log('no current tw event, database must be wrong');
+} else if (currentEvent.tw.eventType === 'challenge') {
   currentEvent.tw.detail = dbTW.challengeEventDetailMap.entries[currentEvent.tw.eventId];
 } else if (currentEvent.tw.eventType === 'story') {
   currentEvent.tw.detail = dbTW.storyEventMap.entries[currentEvent.tw.eventId];
