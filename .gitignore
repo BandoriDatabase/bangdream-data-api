@@ -59,3 +59,4 @@ typings/
 
 # customs
 data/*.json
+cache/*/*.json

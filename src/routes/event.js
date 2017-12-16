@@ -17,7 +17,9 @@ const currentEvent = {
 };
 if (!currentEvent.jp) {
   console.log('no current jp event, database must be wrong');
-} else if (currentEvent.jp.eventType === 'challenge') {
+  [currentEvent.jp] = mapToList(dbJP.eventMap.entries).slice(-1);
+}
+if (currentEvent.jp.eventType === 'challenge') {
   currentEvent.jp.detail = dbJP.challengeEventDetailMap.entries[currentEvent.jp.eventId];
 } else if (currentEvent.jp.eventType === 'story') {
   currentEvent.jp.detail = dbJP.storyEventMap.entries[currentEvent.jp.eventId];
@@ -26,7 +28,9 @@ if (!currentEvent.jp) {
 }
 if (!currentEvent.tw) {
   console.log('no current tw event, database must be wrong');
-} else if (currentEvent.tw.eventType === 'challenge') {
+  [currentEvent.tw] = mapToList(dbTW.eventMap.entries).slice(-1);
+}
+if (currentEvent.tw.eventType === 'challenge') {
   currentEvent.tw.detail = dbTW.challengeEventDetailMap.entries[currentEvent.tw.eventId];
 } else if (currentEvent.tw.eventType === 'story') {
   currentEvent.tw.detail = dbTW.storyEventMap.entries[currentEvent.tw.eventId];
