@@ -3,11 +3,24 @@ import { apiBase, pageLimit } from '../config';
 import { dbJP, dbTW } from '../db';
 import mapToList from '../utils/mapToList';
 
+function addMaxParams(card) {
+  const maxLv = Number(Object.keys(card.parameterMap).slice(-1)[0]);
+  return Object.assign({}, card, {
+    maxLevel: maxLv,
+    maxPerformance: card.parameterMap[maxLv].performance,
+    maxTechnique: card.parameterMap[maxLv].technique,
+    maxVisual: card.parameterMap[maxLv].visual,
+    totalMaxParam: Number(card.parameterMap[maxLv].performance) +
+      Number(card.parameterMap[maxLv].technique) +
+      Number(card.parameterMap[maxLv].visual),
+  });
+}
+
 const api = 'card';
 const router = new Router();
 const cardList = {
-  jp: mapToList(dbJP.cardInfos.entries).reverse(),
-  tw: mapToList(dbTW.cardInfos.entries).reverse(),
+  jp: mapToList(dbJP.cardInfos.entries).reverse().map(card => addMaxParams(card)),
+  tw: mapToList(dbTW.cardInfos.entries).reverse().map(card => addMaxParams(card)),
 };
 const cardMap = {
   jp: dbJP.cardInfos.entries,
@@ -20,23 +33,8 @@ const skillMap = {
 
 router.prefix(`${apiBase}/${api}`);
 
-function addMaxParams(card, isDelParamMap) {
-  const maxLv = Number(Object.keys(card.parameterMap).slice(-1)[0]);
-  return Object.assign({}, card, {
-    maxLevel: maxLv,
-    maxPerformance: card.parameterMap[maxLv].performance,
-    maxTechnique: card.parameterMap[maxLv].technique,
-    maxVisual: card.parameterMap[maxLv].visual,
-    totalMaxParam: Number(card.parameterMap[maxLv].performance) +
-      Number(card.parameterMap[maxLv].technique) +
-      Number(card.parameterMap[maxLv].visual),
-  }, {
-    parameterMap: isDelParamMap ? undefined : card.parameterMap,
-  });
-}
-
 router.get('/', async (ctx, next) => {
-  // query accept 'rarity', 'attr', 'charaId', 'limit', 'page'
+  // query accept 'rarity', 'attr', 'charaId', 'skill', 'limit', 'page', 'orderkey', 'sort'
   // console.log(ctx.query);
   const limit = ctx.query.limit || pageLimit;
   const page = ctx.query.page || 1;
@@ -47,23 +45,13 @@ router.get('/', async (ctx, next) => {
   ) {
     ctx.throw(400, 'wrong query param type');
   }
-  if (limit * (page - 1) > cardList[ctx.params.server].length || limit > pageLimit) {
-    ctx.throw(400, 'query length exceed limit');
-  }
-  ctx.body = cardList[ctx.params.server].map(card => ({
-    characterId: card.characterId,
-    cardId: card.cardId,
-    title: card.title,
-    cardRes: card.cardRes,
-    attr: card.attr,
-    rarity: card.rarity,
-    parameterMap: card.parameterMap,
+  ctx.body = cardList[ctx.params.server].map(card => Object.assign({}, card, {
     skill: skillMap[ctx.params.server][card.cardId],
+    parameterMap: undefined,
   }));
-  ctx.body = ctx.body.map(card => addMaxParams(card, true));
   if (ctx.query.rarity) {
     ctx.body = ctx.body
-      .filter(card => ctx.query.rarity.includes(card.rarity));
+      .filter(card => ctx.query.rarity.includes(card.rarity.toString()));
   }
   if (ctx.query.attr) {
     ctx.body = ctx.body
@@ -71,23 +59,34 @@ router.get('/', async (ctx, next) => {
   }
   if (ctx.query.charaId) {
     ctx.body = ctx.body
-      .filter(card => ctx.query.charaId.includes(card.characterId));
+      .filter(card => ctx.query.charaId.includes(card.characterId.toString()));
   }
-  ctx.body = {
-    totalCount: ctx.body.length,
-    data: ctx.body.slice((page - 1) * limit, page * limit),
-  };
+  if (ctx.query.skill) {
+    ctx.body = ctx.body
+      .filter(card => ctx.query.skill.includes(card.skill.skillId.toString()));
+  }
+  if (ctx.query.sort && ctx.query.orderKey) {
+    if (ctx.query.sort === 'asc') ctx.body = ctx.body.sort((a, b) => a[ctx.query.orderKey] - b[ctx.query.orderKey]);
+    else if (ctx.query.sort === 'desc') ctx.body = ctx.body.sort((a, b) => b[ctx.query.orderKey] - a[ctx.query.orderKey]);
+  }
+  ctx.body = ctx.body.slice((page - 1) * limit, page * limit);
+  if (!ctx.body.length) {
+    ctx.throw(400, 'query length exceed limit');
+    ctx.body = null;
+  } else {
+    ctx.body = {
+      totalCount: ctx.body.length,
+      data: ctx.body,
+    };
+  }
   await next();
 });
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
-  try {
-    ctx.body = addMaxParams(cardMap[ctx.params.server][ctx.params.id]);
-  } catch (error) {
-    ctx.throw(400, 'card not exists');
-  } finally {
-    await next();
-  }
+  const card = cardMap[ctx.params.server][ctx.params.id];
+  if (card) ctx.body = card;
+  else ctx.throw(400, 'card not exists');
+  await next();
 });
 
 export default router;

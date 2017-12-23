@@ -25,7 +25,7 @@ const bandMap = {
 router.prefix(`${apiBase}/${api}`);
 
 router.get('/', async (ctx, next) => {
-  // query accept 'rarity', 'attr', 'charaId', 'limit', 'page'
+  // query accept 'bandId', 'limit', 'page', 'orderkey', 'sort'
   // console.log(ctx.query);
   const limit = ctx.query.limit || pageLimit;
   const page = ctx.query.page || 1;
@@ -36,26 +36,29 @@ router.get('/', async (ctx, next) => {
   ) {
     ctx.throw(400, 'wrong query param type');
   }
-  if (limit * (page - 1) > musicList[ctx.params.server].length || limit > pageLimit) {
-    ctx.throw(400, 'query length exceed limit');
-  }
-  ctx.body = musicList[ctx.params.server].map(music => ({
-    musicId: music.musicId,
+  ctx.body = musicList[ctx.params.server].map(music => Object.assign({}, music, {
     bgmFile: `/assets/sound/${music.bgmId}.mp3`,
     jacket: `/assets/musicjacket/${music.jacketImage}_jacket.png`,
-    title: music.title,
-    bandId: music.bandId,
-    tag: music.tag,
     bandName: bandMap[ctx.params.server][music.bandId].bandName,
   }));
   if (ctx.query.bandId) {
     ctx.body = ctx.body
-      .filter(music => ctx.query.bandId.includes(music.bandId));
+      .filter(music => ctx.query.bandId.includes(music.bandId.toString()));
   }
-  ctx.body = {
-    totalCount: ctx.body.length,
-    data: ctx.body.slice((page - 1) * limit, page * limit),
-  };
+  if (ctx.query.sort && ctx.query.orderKey) {
+    if (ctx.query.sort === 'asc') ctx.body = ctx.body.sort((a, b) => a[ctx.query.orderKey] - b[ctx.query.orderKey]);
+    else if (ctx.query.sort === 'desc') ctx.body = ctx.body.sort((a, b) => b[ctx.query.orderKey] - a[ctx.query.orderKey]);
+  }
+  ctx.body = ctx.body.slice((page - 1) * limit, page * limit);
+  if (!ctx.body.length) {
+    ctx.throw(400, 'query length exceed limit');
+    ctx.body = null;
+  } else {
+    ctx.body = {
+      totalCount: ctx.body.length,
+      data: ctx.body,
+    };
+  }
   await next();
 });
 

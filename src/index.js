@@ -11,6 +11,7 @@ import routesLoader from './utils/routesLoader';
 require('./bootstrap');
 
 const app = new Koa();
+require('koa-qs')(app);
 
 if (process.env.NODE_ENV === 'development') {
   app.use(logger());

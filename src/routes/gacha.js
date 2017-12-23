@@ -6,8 +6,8 @@ import mapToList from '../utils/mapToList';
 const api = 'gacha';
 const router = new Router();
 const gachaList = {
-  jp: mapToList(dbJP.gachaMap.entries),
-  tw: mapToList(dbTW.gachaMap.entries),
+  jp: mapToList(dbJP.gachaMap.entries).sort((a, b) => Number(a.closedAt) - Number(b.closedAt)),
+  tw: mapToList(dbTW.gachaMap.entries).sort((a, b) => Number(a.closedAt) - Number(b.closedAt)),
 };
 const gachaMap = {
   jp: dbJP.gachaMap.entries,
