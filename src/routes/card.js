@@ -19,8 +19,8 @@ function addMaxParams(card) {
 const api = 'card';
 const router = new Router();
 const cardList = {
-  jp: mapToList(dbJP.cardInfos.entries).reverse().map(card => addMaxParams(card)),
-  tw: mapToList(dbTW.cardInfos.entries).reverse().map(card => addMaxParams(card)),
+  jp: mapToList(dbJP.cardInfos.entries).reverse().map(addMaxParams),
+  tw: mapToList(dbTW.cardInfos.entries).reverse().map(addMaxParams),
 };
 const cardMap = {
   jp: dbJP.cardInfos.entries,
@@ -84,7 +84,7 @@ router.get('/', async (ctx, next) => {
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
   const card = cardMap[ctx.params.server][ctx.params.id];
-  if (card) ctx.body = card;
+  if (card) ctx.body = addMaxParams(card);
   else ctx.throw(400, 'card not exists');
   await next();
 });
