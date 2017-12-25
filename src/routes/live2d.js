@@ -1,4 +1,5 @@
 import Router from 'koa-router';
+import path from 'path';
 import fetch from 'isomorphic-fetch';
 import { apiBase } from '../config';
 import { dbJP, dbTW } from '../db';
@@ -56,18 +57,18 @@ router.get('/model/:costumId(\\d{1,4})', async (ctx, next) => {
     ctx.body = {
       type: 'Live2D Model Setting',
       name: costum.description,
-      model: `assets/${buildData.model.bundleName}_${buildData.model.fileName.replace('.bytes', '')}`,
-      textures: buildData.textures.Array.map(elem => `assets/${elem.data.bundleName}_${elem.data.fileName.replace('.png', '')}.png`),
-      physics: `assets/${buildData.physics.bundleName}_${buildData.physics.fileName.replace('.json', '')}`,
+      model: `live2d/${path.basename(buildData.model.bundleName)}_${buildData.model.fileName.replace('.bytes', '')}`,
+      textures: buildData.textures.Array.map(elem => `live2d/${path.basename(elem.data.bundleName)}_${elem.data.fileName.replace('.png', '')}.png`),
+      physics: `live2d/${path.basename(buildData.physics.bundleName)}_${buildData.physics.fileName.replace('.json', '')}`,
       expressions: buildData.expressions.Array.map(elem => ({
         name: elem.data.fileName.replace('.exp.json', ''),
-        file: `assets/${elem.data.bundleName}_${elem.data.fileName.replace('.json', '')}`,
+        file: `live2d/${path.basename(elem.data.bundleName)}_${elem.data.fileName.replace('.json', '')}`,
       })),
       motions: buildData.motions.Array.reduce((prev, curr) => {
         const key = curr.data.fileName.split('.')[0];
         prev[key] = [
           {
-            file: `assets/${curr.data.bundleName}_${curr.data.fileName.replace('.bytes', '')}`,
+            file: `live2d/${path.basename(curr.data.bundleName)}_${curr.data.fileName.replace('.bytes', '')}`,
             fade_in: 2000,
             fade_out: 2000,
           },
