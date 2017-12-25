@@ -18,7 +18,7 @@ export default () => {
     .then(res => res.text())
     .then((res) => {
       fs.writeFileSync(masDBAddr.tw, res);
-      console.log('got a new tw masterdb, please restart server');
+      console.log(`got a new tw masterdb, please restart server, time: ${(new Date()).toISOString()}`);
       // exit for auto reload, use with supervisord or similar tools
       process.exit(1);
     });
