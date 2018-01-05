@@ -47,6 +47,7 @@ function getCurrEvent() {
   } else if (currentEvent.tw.eventType === 'versus') {
     currentEvent.tw.detail = dbTW.versusEventMap.entries[currentEvent.tw.eventId];
   }
+  return currentEvent;
 }
 
 router.prefix(`${apiBase}/${api}`);
