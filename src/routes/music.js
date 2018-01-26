@@ -1,6 +1,6 @@
 import Router from 'koa-router';
 import path from 'path';
-import fs from 'fs';
+import fs from 'fs-extra';
 import fetch from 'isomorphic-fetch';
 import bms from 'bms';
 import { apiBase, pageLimit } from '../config';
@@ -40,6 +40,8 @@ router.get('/', async (ctx, next) => {
     bgmFile: `/assets/sound/${music.bgmId}.mp3`,
     jacket: `/assets/musicjacket/${music.jacketImage}_jacket.png`,
     bandName: bandMap[ctx.params.server][music.bandId].bandName,
+    difficulty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId).map(elem => elem.level),
+    maxDifficilty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId)[1].level,
   }));
   if (ctx.query.bandId) {
     ctx.body = ctx.body
@@ -109,7 +111,13 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
         'cmd_fever_ready.wav': 'Cmd_Fever_Ready',
         'cmd_fever_start.wav': 'Cmd_Ferver_Start',
         'cmd_fever_end.wav': 'Cmd_Fever_End',
+        'fever_slide_a.wav': 'Slide_A',
+        'fever_slide_end_a.wav': 'Slide_End_A',
+        'fever_slide_b.wav': 'Slide_B',
+        'fever_slide_end_b.wav': 'Slide_End_B',
       };
+      let isInSlideA = false;
+      let isInSlideB = false;
       // map note timing
       Notes = Notes.filter(note =>
         ['cmd_fever_ready.wav', 'cmd_fever_start.wav', 'cmd_fever_end.wav']
@@ -125,7 +133,23 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
             break;
           }
           default:
-            note.type = keyMap[Keysounds[note.keysound.toLowerCase()]] || 'Music';
+            if (!Keysounds[note.keysound.toLowerCase()]) return;
+            if (Keysounds[note.keysound.toLowerCase()].indexOf('bgm') !== -1) {
+              note.type = 'Music';
+            } else {
+              note.type = keyMap[Keysounds[note.keysound.toLowerCase()]] || 'Single';
+            }
+            if (note.type === 'Slide_A' && !isInSlideA) {
+              isInSlideA = true;
+              note.type = 'Slide_Start_A';
+            } else if (note.type === 'Slide_B' && !isInSlideB) {
+              isInSlideB = true;
+              note.type = 'Slide_Start_B';
+            } else if (note.type === 'Slide_End_A' && isInSlideA) {
+              isInSlideA = false;
+            } else if (note.type === 'Slide_End_B' && isInSlideB) {
+              isInSlideB = false;
+            }
             break;
         }
         note.timing = (beatInterval * (note.beat - x)) + t;
@@ -133,10 +157,10 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
         note.index = idx;
       });
 
-      fs.writeFileSync(localChartFileName, JSON.stringify(Notes));
+      await fs.outputJSON(localChartFileName, Notes);
       ctx.body = Notes;
     } else {
-      ctx.body = JSON.parse(fs.readFileSync(localChartFileName));
+      ctx.body = await fs.readJSON(localChartFileName);
     }
   } catch (error) {
     console.log(error);
