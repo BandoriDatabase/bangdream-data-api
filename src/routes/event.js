@@ -6,8 +6,8 @@ import mapToList from '../utils/mapToList';
 const api = 'event';
 const router = new Router();
 const eventList = {
-  jp: mapToList(dbJP.eventMap.entries),
-  tw: mapToList(dbTW.eventMap.entries),
+  jp: mapToList(dbJP.eventMap.entries).sort((a, b) => Number(a.startAt) - Number(b.startAt)),
+  tw: mapToList(dbTW.eventMap.entries).sort((a, b) => Number(a.startAt) - Number(b.startAt)),
 };
 const eventBadgeList = {
   jp: mapToList(dbJP.eventBadgeMap.entries),
@@ -16,14 +16,8 @@ const eventBadgeList = {
 
 function getCurrEvent() {
   const currentEvent = {
-    jp: eventList.jp
-      .find(elem => elem.enableFlag &&
-        Number(elem.publicStartAt) < Date.now() &&
-        Number(elem.publicEndAt) > Date.now()),
-    tw: eventList.tw
-      .find(elem => elem.enableFlag &&
-        Number(elem.publicStartAt) < Date.now() &&
-        Number(elem.publicEndAt) > Date.now()),
+    jp: eventList.jp.slice(-1)[0],
+    tw: eventList.tw.slice(-1)[0],
   };
   if (!currentEvent.jp) {
     console.log('no current jp event, database must be wrong');

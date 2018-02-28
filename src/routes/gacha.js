@@ -15,7 +15,7 @@ const gachaMap = {
 };
 const gachaInformationMap = {
   jp: dbJP.gachaInformationMap.entries,
-  // tw: dbTW.gachaInformationMap.entries,
+  tw: dbTW.gachaInformationMap.entries,
 };
 
 router.prefix(`${apiBase}/${api}`);
@@ -45,14 +45,13 @@ router.get('/', async (ctx, next) => {
 
 router.get('/current', async (ctx, next) => {
   ctx.body = gachaList[ctx.params.server]
-    .filter(elem => Number(elem.publishedAt) < Date.now() &&
-      Number(elem.closedAt) > Date.now() &&
+    .filter(elem => Number(elem.closedAt) > Date.now() &&
       elem.closedAt.substring(0, 1) !== '4');
-  if (ctx.params.server === 'jp') {
-    ctx.body = ctx.body.map(gacha => Object.assign({}, gacha, {
-      information: gachaInformationMap[ctx.params.server][gacha.gachaId],
-    }));
-  }
+  // resort
+  ctx.body = ctx.body.sort((a, b) => Number(a.publishedAt) - Number(b.publishedAt));
+  ctx.body = ctx.body.map(gacha => Object.assign({}, gacha, {
+    information: gachaInformationMap[ctx.params.server][gacha.gachaId],
+  }));
   ctx.body = {
     totalCount: ctx.body.length,
     data: ctx.body,

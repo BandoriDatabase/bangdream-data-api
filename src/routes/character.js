@@ -74,4 +74,45 @@ router.get('/band', async (ctx, next) => {
   await next();
 });
 
+router.get('/birthday', async (ctx, next) => {
+  // chara birthday is stored as the day in year 2000, 00:00:00 UTC+9
+  // get today's date and month
+  const today = new Date();
+  const todayMonth = today.toISOString().substr(5, 2);
+  const todayDate = today.toISOString().substr(8, 2);
+
+  const ret = {};
+  charaList[ctx.params.server].filter(chara => chara.bandId).forEach((chara) => {
+    const bd = new Date(Number(chara.profile.birthday) + (9 * 3600 * 1000));
+    const bdMonth = bd.toISOString().substr(5, 2);
+    const bdDate = bd.toISOString().substr(8, 2);
+
+    if (bdMonth === todayMonth && bdDate === todayDate) {
+      // check if today is the birthday
+      ret.today = {
+        chara,
+        birthday: {
+          timestamp: Number(chara.profile.birthday) + (9 * 3600 * 1000),
+          month: bdMonth,
+          day: bdDate,
+        },
+      };
+    } else if (!ret.next || (bdMonth > todayMonth && bdMonth <= ret.next.birthday.month && bdDate < ret.next.birthday.day)
+      || (bdMonth === todayMonth && bdMonth <= ret.next.birthday.month && bdDate > todayDate && bdDate < ret.next.birthday.day)) {
+      // record it as next birthday
+      ret.next = {
+        chara,
+        birthday: {
+          timestamp: Number(chara.profile.birthday) + (9 * 3600 * 1000),
+          month: bdMonth,
+          day: bdDate,
+        },
+      };
+    }
+  });
+
+  ctx.body = ret;
+  await next();
+});
+
 export default router;

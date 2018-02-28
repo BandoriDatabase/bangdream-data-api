@@ -10,7 +10,7 @@ const resVer = {
 };
 const masterVer = {
   jp: dbJP.constants.masterVer,
-  tw: dbTW.constants.masterVer
+  tw: dbTW.constants.masterVer,
 };
 
 router.prefix(`${apiBase}/${api}`);
