@@ -9,7 +9,7 @@ router.prefix(`${apiBase}/${api}`);
 
 router.get('/chara/:name', async (ctx, next) => {
   try {
-    const remoteScenarioPath = `https://res.bangdream.ga/assets${ctx.params.server}/characters/resourceset/Scenario${ctx.params.name}.json`;
+    const remoteScenarioPath = `https://res.bangdream.ga/assets-${ctx.params.server}/characters/resourceset/Scenario${ctx.params.name}.json`;
     const scenarioData = await (await fetch(remoteScenarioPath)).json();
     const ret = {};
     ret.env = {
