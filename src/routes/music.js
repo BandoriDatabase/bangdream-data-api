@@ -4,23 +4,23 @@ import fs from 'fs-extra';
 import fetch from 'isomorphic-fetch';
 import bms from 'bms';
 import { apiBase, pageLimit } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 // import mapToList from '../utils/mapToList';
 
 const api = 'music';
 const router = new Router();
-const musicList = {
-  jp: dbJP.musicList.entries.slice().reverse(),
-  tw: dbTW.musicList.entries.slice().reverse(),
-};
-const musicDiffiList = {
-  jp: dbJP.musicDifficultyList.entries,
-  tw: dbTW.musicDifficultyList.entries,
-};
-const bandMap = {
-  jp: dbJP.bandMap.entries,
-  tw: dbTW.bandMap.entries,
-};
+const musicList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].musicList.entries.slice().reverse();
+  return sum;
+}, {});
+const musicDiffiList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].musicDifficultyList.entries;
+  return sum;
+}, {});
+const bandMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].bandMap.entries;
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -91,9 +91,9 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
       const remoteChartFileName = `https://res.bangdream.ga/assets/musicscore/${String(music.musicId).padStart(3, '0')}_${music.chartAssetBundleName}_${ctx.params.difficulty}.txt`;
       const res = await (await fetch(remoteChartFileName)).text();
       const { chart } = bms.Compiler.compile(res);
-      const Segments = bms.Timing.fromBMSChart(chart)._speedcore._segments;
-      let Notes = bms.Notes.fromBMSChart(chart)._notes.sort((a, b) => a.beat - b.beat);
-      const Keysounds = bms.Keysounds.fromBMSChart(chart)._map;
+      const Segments = bms.Timing.fromBMSChart(chart)._speedcore._segments; //eslint-disable-line
+      let Notes = bms.Notes.fromBMSChart(chart)._notes.sort((a, b) => a.beat - b.beat); //eslint-disable-line
+      const Keysounds = bms.Keysounds.fromBMSChart(chart)._map; //eslint-disable-line
 
       // map note type
       const keyMap = {

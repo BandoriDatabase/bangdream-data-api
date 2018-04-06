@@ -1,17 +1,17 @@
 import Router from 'koa-router';
 import { apiBase } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 
 const api = 'version';
 const router = new Router();
-const resVer = {
-  jp: dbJP.constants.resVer,
-  tw: dbTW.constants.resVer,
-};
-const masterVer = {
-  jp: dbJP.constants.masterVer,
-  tw: dbTW.constants.masterVer,
-};
+const resVer = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].constants.resVer;
+  return sum;
+}, {});
+const masterVer = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].constants.masterVer;
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 

@@ -1,30 +1,34 @@
 import Router from 'koa-router';
 import { apiBase } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'skill';
 const router = new Router();
-const skillMapList = {
-  jp: mapToList(dbJP.skillMap.entries),
-  tw: mapToList(dbTW.skillMap.entries),
-};
-const skillMap = {
-  jp: dbJP.skillMap.entries,
-  tw: dbTW.skillMap.entries,
-};
-const skillList = {
-  jp: dbJP.skillList.entries,
-  tw: dbTW.skillList.entries,
-};
-const skillActivateEffectList = {
-  jp: dbJP.skillActivateEffectList.entries,
-  // tw: dbTW.skillActivateEffectList.entries,
-};
-const skillOnceEffectList = {
-  jp: dbJP.skillOnceEffectList.entries,
-  // tw: dbTW.skillOnceEffectList.entries,
-};
+const skillMapList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].skillMap.entries);
+  return sum;
+}, {});
+const skillMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].skillMap.entries;
+  return sum;
+}, {});
+const skillList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].skillList.entries;
+  return sum;
+}, {});
+const skillActivateEffectList = Object.keys(dbMap).reduce((sum, region) => {
+  if (dbMap[region].skillActivateEffectList) {
+    sum[region] = dbMap[region].skillActivateEffectList.entries;
+  }
+  return sum;
+}, {});
+const skillOnceEffectList = Object.keys(dbMap).reduce((sum, region) => {
+  if (dbMap[region].skillOnceEffectList) {
+    sum[region] = dbMap[region].skillOnceEffectList.entries;
+  }
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 

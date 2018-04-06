@@ -1,18 +1,18 @@
 import Router from 'koa-router';
 import { apiBase, pageLimit } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'chara';
 const router = new Router();
-const charaList = {
-  jp: mapToList(dbJP.characterInfoMap.entries),
-  tw: mapToList(dbTW.characterInfoMap.entries),
-};
-const charaMap = {
-  jp: dbJP.characterInfoMap.entries,
-  tw: dbTW.characterInfoMap.entries,
-};
+const charaList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].characterInfoMap.entries);
+  return sum;
+}, {});
+const charaMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].characterInfoMap.entries;
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 

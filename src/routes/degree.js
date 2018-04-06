@@ -1,18 +1,18 @@
 import Router from 'koa-router';
 import { apiBase } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'degree';
 const router = new Router();
-const degreeList = {
-  jp: mapToList(dbJP.degreeMap.entries),
-  tw: mapToList(dbTW.degreeMap.entries),
-};
-const degreeMap = {
-  jp: dbJP.degreeMap.entries,
-  tw: dbTW.degreeMap.entries,
-};
+const degreeList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].degreeMap.entries);
+  return sum;
+}, {});
+const degreeMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].degreeMap.entries;
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 

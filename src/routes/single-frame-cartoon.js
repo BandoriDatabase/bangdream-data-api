@@ -1,14 +1,18 @@
 import Router from 'koa-router';
 import { apiBase } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'sfc';
 const router = new Router();
-const singleFCList = {
-  jp: mapToList(dbJP.singleFrameCartoonMap.entries),
-  tw: dbTW.singleFrameCartoonList.entries,
-};
+const singleFCList = Object.keys(dbMap).reduce((sum, region) => {
+  if (dbMap[region].singleFrameCartoonList) {
+    sum[region] = dbMap[region].singleFrameCartoonList.entries;
+  } else if (dbMap[region].singleFrameCartoonMap) {
+    sum[region] = mapToList(dbMap[region].singleFrameCartoonMap.entries);
+  }
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 

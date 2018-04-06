@@ -2,27 +2,27 @@ import Router from 'koa-router';
 import path from 'path';
 import fetch from 'isomorphic-fetch';
 import { apiBase } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'live2d';
 const router = new Router();
-const live2dVoiceList = {
-  jp: mapToList(dbJP.commonsLive2dMap.entries),
-  tw: mapToList(dbTW.commonsLive2dMap.entries),
-};
+const live2dVoiceList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].commonsLive2dMap.entries);
+  return sum;
+}, {});
 // const live2dVoiceMap = {
 //   jp: dbJP.commonsLive2dMap.entries,
 //   tw: dbTW.commonsLive2dMap.entries,
 // };
-const live2dCostumList = {
-  jp: mapToList(dbJP.costumeMap.entries),
-  tw: mapToList(dbTW.costumeMap.entries),
-};
-const live2dCostumMap = {
-  jp: dbJP.costumeMap.entries,
-  tw: dbTW.costumeMap.entries,
-};
+const live2dCostumList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].costumeMap.entries);
+  return sum;
+}, {});
+const live2dCostumMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].costumeMap.entries;
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 

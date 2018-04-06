@@ -1,50 +1,38 @@
 import Router from 'koa-router';
 import { apiBase } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'event';
 const router = new Router();
-const eventList = {
-  jp: mapToList(dbJP.eventMap.entries).sort((a, b) => Number(a.startAt) - Number(b.startAt)),
-  tw: mapToList(dbTW.eventMap.entries).sort((a, b) => Number(a.startAt) - Number(b.startAt)),
-};
-const eventBadgeList = {
-  jp: mapToList(dbJP.eventBadgeMap.entries),
-  tw: mapToList(dbTW.eventBadgeMap.entries),
-};
+const eventList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].eventMap.entries).filter(elem => Number(elem.endAt) > Date.now());
+  return sum;
+}, {});
+// console.log(eventList);
+const eventBadgeList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].eventBadgeMap.entries);
+  return sum;
+}, {});
 
 function getCurrEvent() {
-  const currentEvent = {
-    jp: eventList.jp.slice(-1)[0],
-    tw: eventList.tw.slice(-1)[0],
-  };
-  if (!currentEvent.jp) {
-    console.log('no current jp event, database must be wrong');
-    [currentEvent.jp] = mapToList(dbJP.eventMap.entries).slice(-1);
-  }
-  if (currentEvent.jp.eventType === 'challenge') {
-    currentEvent.jp.detail = dbJP.challengeEventMap.entries[currentEvent.jp.eventId];
-  } else if (currentEvent.jp.eventType === 'story') {
-    currentEvent.jp.detail = dbJP.storyEventMap.entries[currentEvent.jp.eventId];
-  } else if (currentEvent.jp.eventType === 'versus') {
-    currentEvent.jp.detail = dbJP.versusEventMap.entries[currentEvent.jp.eventId];
-  } else if (currentEvent.jp.eventType === 'live_try') {
-    currentEvent.jp.detail = dbJP.liveTryEventMap.entries[currentEvent.jp.eventId];
-  }
-  if (!currentEvent.tw) {
-    console.log('no current tw event, database must be wrong');
-    [currentEvent.tw] = mapToList(dbTW.eventMap.entries).slice(-1);
-  }
-  if (currentEvent.tw.eventType === 'challenge') {
-    currentEvent.tw.detail = dbTW.challengeEventMap.entries[currentEvent.tw.eventId];
-  } else if (currentEvent.tw.eventType === 'story') {
-    currentEvent.tw.detail = dbTW.storyEventMap.entries[currentEvent.tw.eventId];
-  } else if (currentEvent.tw.eventType === 'versus') {
-    currentEvent.tw.detail = dbTW.versusEventMap.entries[currentEvent.tw.eventId];
-  } else if (currentEvent.jp.eventType === 'live_try') {
-    currentEvent.jp.detail = dbTW.liveTryEventMap.entries[currentEvent.jp.eventId];
-  }
+  const currentEvent = Object.keys(eventList).reduce((sum, region) => {
+    const currEvent = eventList[region].find(elem =>
+      (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()) ||
+      (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()))
+      || eventList[region][0];
+    if (currEvent.eventType === 'challenge') {
+      currEvent.detail = dbMap[region].challengeEventMap.entries[currEvent.eventId];
+    } else if (currEvent.eventType === 'story') {
+      currEvent.detail = dbMap[region].storyEventMap.entries[currEvent.eventId];
+    } else if (currEvent.eventType === 'versus') {
+      currEvent.detail = dbMap[region].versusEventMap.entries[currEvent.eventId];
+    } else if (currEvent.eventType === 'live_try') {
+      currEvent.detail = dbMap[region].liveTryEventMap.entries[currEvent.eventId];
+    }
+    sum[region] = currEvent;
+    return sum;
+  }, {});
   return currentEvent;
 }
 

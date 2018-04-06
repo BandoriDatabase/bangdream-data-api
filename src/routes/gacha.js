@@ -1,22 +1,24 @@
 import Router from 'koa-router';
 import { apiBase, pageLimit } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 const api = 'gacha';
 const router = new Router();
-const gachaList = {
-  jp: mapToList(dbJP.gachaMap.entries).sort((a, b) => Number(a.closedAt) - Number(b.closedAt)),
-  tw: mapToList(dbTW.gachaMap.entries).sort((a, b) => Number(a.closedAt) - Number(b.closedAt)),
-};
-const gachaMap = {
-  jp: dbJP.gachaMap.entries,
-  tw: dbTW.gachaMap.entries,
-};
-const gachaInformationMap = {
-  jp: dbJP.gachaInformationMap.entries,
-  tw: dbTW.gachaInformationMap.entries,
-};
+const gachaList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].gachaMap.entries).sort((a, b) => Number(a.closedAt) - Number(b.closedAt));
+  return sum;
+}, {});
+const gachaMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].gachaMap.entries;
+  return sum;
+}, {});
+const gachaInformationMap = Object.keys(dbMap).reduce((sum, region) => {
+  if (dbMap[region].gachaInformationMap) {
+    sum[region] = dbMap[region].gachaInformationMap.entries;
+  }
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -49,9 +51,11 @@ router.get('/current', async (ctx, next) => {
       elem.closedAt.substring(0, 1) !== '4');
   // resort
   ctx.body = ctx.body.sort((a, b) => Number(a.publishedAt) - Number(b.publishedAt));
-  ctx.body = ctx.body.map(gacha => Object.assign({}, gacha, {
-    information: gachaInformationMap[ctx.params.server][gacha.gachaId],
-  }));
+  if (gachaInformationMap[ctx.params.server]) {
+    ctx.body = ctx.body.map(gacha => Object.assign({}, gacha, {
+      information: gachaInformationMap[ctx.params.server][gacha.gachaId],
+    }));
+  }
   ctx.body = {
     totalCount: ctx.body.length,
     data: ctx.body,

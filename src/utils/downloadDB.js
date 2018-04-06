@@ -18,7 +18,23 @@ export default () => {
     .then(res => res.text())
     .then((res) => {
       fs.writeFileSync(masDBAddr.tw, res);
-      console.log(`got a new tw masterdb, please restart server, time: ${(new Date()).toISOString()}`);
+      console.log('got a new tw masterdb');
+      return fetch(`${remoteAddr[process.env.NODE_ENV]}/static/MasterDB_kr.json`);
+      // console.log(`got a new tw masterdb, please restart server, time: ${(new Date()).toISOString()}`);
+      // exit for auto reload, use with supervisord or similar tools
+      // process.exit(1);
+    })
+    .then(res => res.text())
+    .then((res) => {
+      fs.writeFileSync(masDBAddr.kr, res);
+      console.log('got a new kr masterdb');
+      return fetch(`${remoteAddr[process.env.NODE_ENV]}/static/MasterDB_en.json`);
+    })
+    .then(res => res.text())
+    .then((res) => {
+      fs.writeFileSync(masDBAddr.en, res);
+      console.log('got a new en masterdb');
+      console.log(`please restart server, time: ${(new Date()).toISOString()}`);
       // exit for auto reload, use with supervisord or similar tools
       process.exit(1);
     });

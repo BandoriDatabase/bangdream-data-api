@@ -15,7 +15,12 @@ if (!process.env.ALLOW_API_KEY) {
 }
 
 // download masterdb if it is not present, then force reload
-if (!fs.existsSync(masDBAddr.jp) || !fs.existsSync(masDBAddr.tw)) {
+if (
+  !fs.existsSync(masDBAddr.jp) ||
+  !fs.existsSync(masDBAddr.tw) ||
+  !fs.existsSync(masDBAddr.kr) ||
+  !fs.existsSync(masDBAddr.en)
+) {
   console.log('no masterdb found, fetching one...');
   global.isFirstStart = true;
   downloadDB();

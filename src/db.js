@@ -1,4 +1,8 @@
 import { masDBAddr } from './config';
 
-export const dbJP = require(masDBAddr.jp);
-export const dbTW = require(masDBAddr.tw);
+const dbMap = {};
+Object.keys(masDBAddr).forEach((region) => {
+  dbMap[region] = require(masDBAddr[region]);
+});
+
+export default dbMap;

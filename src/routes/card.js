@@ -1,6 +1,6 @@
 import Router from 'koa-router';
 import { apiBase, pageLimit } from '../config';
-import { dbJP, dbTW } from '../db';
+import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
 function addMaxParams(card) {
@@ -18,18 +18,18 @@ function addMaxParams(card) {
 
 const api = 'card';
 const router = new Router();
-const cardList = {
-  jp: mapToList(dbJP.cardInfos.entries).reverse().map(addMaxParams),
-  tw: mapToList(dbTW.cardInfos.entries).reverse().map(addMaxParams),
-};
-const cardMap = {
-  jp: dbJP.cardInfos.entries,
-  tw: dbTW.cardInfos.entries,
-};
-const skillMap = {
-  jp: dbJP.skillMap.entries,
-  tw: dbTW.skillMap.entries,
-};
+const cardList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].cardInfos.entries).reverse().map(addMaxParams);
+  return sum;
+}, {});
+const cardMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].cardInfos.entries;
+  return sum;
+}, {});
+const skillMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].skillMap.entries;
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 
