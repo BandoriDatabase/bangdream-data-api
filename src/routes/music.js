@@ -109,7 +109,7 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
         'slide_end_flick_a.wav': 'Slide_End_Flick_A',
         'slide_end_flick_b.wav': 'Slide_End_Flick_B',
         'cmd_fever_ready.wav': 'Cmd_Fever_Ready',
-        'cmd_fever_start.wav': 'Cmd_Ferver_Start',
+        'cmd_fever_start.wav': 'Cmd_Fever_Start',
         'cmd_fever_end.wav': 'Cmd_Fever_End',
         'fever_slide_a.wav': 'Slide_A',
         'fever_slide_end_a.wav': 'Slide_End_A',
@@ -118,10 +118,8 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
       };
       let isInSlideA = false;
       let isInSlideB = false;
+      let feverReady, feverStart, feverEnd;
       // map note timing
-      Notes = Notes.filter(note =>
-        ['cmd_fever_ready.wav', 'cmd_fever_start.wav', 'cmd_fever_end.wav']
-          .indexOf(Keysounds[note.keysound.toLowerCase()]) === -1);
       Notes.forEach((note, idx) => {
         const { bpm, t, x } = Segments.filter(elem => elem.x <= note.beat).slice(-1)[0];
         const beatInterval = 60 / bpm;
@@ -149,6 +147,12 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
               isInSlideA = false;
             } else if (note.type === 'Slide_End_B' && isInSlideB) {
               isInSlideB = false;
+            } else if (note.type === "Cmd_Fever_Ready") {
+              feverReady = note;
+            } else if (note.type === "Cmd_Fever_Start") {
+              feverStart = note;
+            } else if (note.type === "Cmd_Fever_End") {
+              feverEnd = note;
             }
             break;
         }
@@ -156,9 +160,34 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
         if (note.endBeat) note.endTiming = (beatInterval * (note.endBeat - x)) + t;
         note.index = idx;
       });
+      Notes = Notes.filter(note =>
+        ["cmd_fever_ready.wav", "cmd_fever_start.wav", "cmd_fever_end.wav"]
+          .indexOf(Keysounds[note.keysound.toLowerCase()]) === -1);
 
-      await fs.outputJSON(localChartFileName, Notes);
-      ctx.body = Notes;
+      let chartData = {
+        bpm: chart.headers.get("bpm"),
+        fever: {
+          ready: {
+            beat: feverReady.beat,
+            keysound: feverReady.keysound,
+            timing: feverReady.timing
+          },
+          start: {
+            beat: feverStart.beat,
+            keysound: feverStart.keysound,
+            timing: feverStart.timing
+          },
+          end: {
+            beat: feverEnd.beat,
+            keysound: feverEnd.keysound,
+            timing: feverEnd.timing
+          },
+        },
+        notes: Notes
+      }
+
+      await fs.outputJSON(localChartFileName, chartData);
+      ctx.body = chartData;
     } else {
       ctx.body = await fs.readJSON(localChartFileName);
     }
