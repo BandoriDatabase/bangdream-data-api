@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "cross-env ALLOW_API_KEY=testkey NODE_ENV=development nodemon index.js",
+    "dev:local": "cross-env ALLOW_API_KEY=testkey NODE_ENV=development_local nodemon index.js",
     "test": "eslint src/"
   },
   "repository": {
@@ -46,5 +47,8 @@
     "eslint-plugin-import": "^2.8.0",
     "mocha": "^4.0.1",
     "nodemon": "^1.12.1"
+  },
+  "nodemonConfig": {
+    "ignore": ["test/*", "cache/*", "data/*"]
   }
 }

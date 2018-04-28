@@ -3,7 +3,8 @@ import fetch from 'isomorphic-fetch';
 import { masDBAddr } from '../config';
 
 const remoteAddr = {
-  development: 'http://localhost:8080',
+  development_local: 'http://localhost:8080',
+  development: 'https://res.bangdream.ga',
   production: 'https://res.bangdream.ga',
 };
 
