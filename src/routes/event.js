@@ -9,7 +9,6 @@ const eventList = Object.keys(dbMap).reduce((sum, region) => {
   sum[region] = mapToList(dbMap[region].eventMap.entries);
   return sum;
 }, {});
-// console.log(eventList);
 const eventBadgeList = Object.keys(dbMap).reduce((sum, region) => {
   sum[region] = mapToList(dbMap[region].eventBadgeMap.entries);
   return sum;
@@ -19,7 +18,7 @@ function getCurrEvent(region) {
   const currEvent = eventList[region].find(elem =>
     (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()) ||
     (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()))
-    || eventList[region][0];
+    || eventList[region].slice(-1)[0];
   if (currEvent.eventType === 'challenge') {
     currEvent.detail = dbMap[region].challengeEventMap.entries[currEvent.eventId];
   } else if (currEvent.eventType === 'story') {
