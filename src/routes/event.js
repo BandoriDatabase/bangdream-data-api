@@ -15,10 +15,16 @@ const eventBadgeList = Object.keys(dbMap).reduce((sum, region) => {
 }, {});
 
 function getCurrEvent(region) {
-  const currEvent = eventList[region].find(elem =>
+  const nextEvents = eventList[region].filter(elem =>
     (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()) ||
     (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()))
     || eventList[region].slice(-1)[0];
+  let currEvent = nextEvents.find(elem =>
+    (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()));
+  if (!currEvent) {
+    currEvent = nextEvents.find(elem =>
+      (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()));
+  }
   if (currEvent.eventType === 'challenge') {
     currEvent.detail = dbMap[region].challengeEventMap.entries[currEvent.eventId];
   } else if (currEvent.eventType === 'story') {

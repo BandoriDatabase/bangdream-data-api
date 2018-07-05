@@ -85,115 +85,15 @@ router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
       '../../cache/musicscore',
       `${music.chartAssetBundleName}_${ctx.params.difficulty}.json`,
     );
-    // if (!fs.existsSync(localChartFileName)) {
+    if (!fs.existsSync(localChartFileName)) {
       // no cached file here, fetch a new one
-      // const remoteChartFileName = `https://res.bangdream.ga/assets/musicscore/${String(music.musicId).padStart(3, '0')}_${music.chartAssetBundleName}_${ctx.params.difficulty}.txt`;
-      // const res = await (await fetch(remoteChartFileName)).text();
-      // const { chart } = bms.Compiler.compile(res);
-      // const Segments = bms.Timing.fromBMSChart(chart)._speedcore._segments; //eslint-disable-line
-      // console.log(bms.Notes.fromBMSChart(chart));
-      // let Notes = bms.Notes.fromBMSChart(chart)._notes.sort((a, b) => a.beat - b.beat); //eslint-disable-line
-      // const Keysounds = bms.Keysounds.fromBMSChart(chart)._map; //eslint-disable-line
-
-      // // map note type
-      // const keyMap = {
-      //   'flick.wav': 'Flick',
-      //   'bd.wav': 'SingleOrLong',
-      //   'fever_note.wav': 'FeverSingle',
-      //   'fever_note_flick.wav': 'FeverFlick',
-      //   'slide_a.wav': 'Slide_A',
-      //   'slide_end_a.wav': 'Slide_End_A',
-      //   'slide_b.wav': 'Slide_B',
-      //   'slide_end_b.wav': 'Slide_End_B',
-      //   'skill.wav': 'Skill',
-      //   'slide_end_flick_a.wav': 'Slide_End_Flick_A',
-      //   'slide_end_flick_b.wav': 'Slide_End_Flick_B',
-      //   'cmd_fever_ready.wav': 'Cmd_Fever_Ready',
-      //   'cmd_fever_start.wav': 'Cmd_Fever_Start',
-      //   'cmd_fever_end.wav': 'Cmd_Fever_End',
-      //   'fever_slide_a.wav': 'Slide_A',
-      //   'fever_slide_end_a.wav': 'Slide_End_A',
-      //   'fever_slide_b.wav': 'Slide_B',
-      //   'fever_slide_end_b.wav': 'Slide_End_B',
-      // };
-      // let isInSlideA = false;
-      // let isInSlideB = false;
-      // let feverReady;
-      // let feverStart;
-      // let feverEnd;
-      // // map note timing
-      // Notes.forEach((note, idx) => {
-      //   const { bpm, t, x } = Segments.filter(elem => elem.x <= note.beat).slice(-1)[0];
-      //   const beatInterval = 60 / bpm;
-      //   // if (!keyMap[Keysounds[note.keysound.toLowerCase()]]) console.log(Keysounds[note.keysound.toLowerCase()]);
-      //   switch (Keysounds[note.keysound.toLowerCase()]) {
-      //     case 'bd.wav': {
-      //       if (note.endBeat) note.type = 'Long';
-      //       else note.type = 'Single';
-      //       break;
-      //     }
-      //     default:
-      //       if (!Keysounds[note.keysound.toLowerCase()]) return;
-      //       if (Keysounds[note.keysound.toLowerCase()].indexOf('bgm') !== -1) {
-      //         note.type = 'Music';
-      //       } else {
-      //         note.type = keyMap[Keysounds[note.keysound.toLowerCase()]] || 'Single';
-      //       }
-      //       if (note.type === 'Slide_A' && !isInSlideA) {
-      //         isInSlideA = true;
-      //         note.type = 'Slide_Start_A';
-      //       } else if (note.type === 'Slide_B' && !isInSlideB) {
-      //         isInSlideB = true;
-      //         note.type = 'Slide_Start_B';
-      //       } else if (note.type === 'Slide_End_A' && isInSlideA) {
-      //         isInSlideA = false;
-      //       } else if (note.type === 'Slide_End_B' && isInSlideB) {
-      //         isInSlideB = false;
-      //       } else if (note.type === 'Cmd_Fever_Ready') {
-      //         feverReady = note;
-      //       } else if (note.type === 'Cmd_Fever_Start') {
-      //         feverStart = note;
-      //       } else if (note.type === 'Cmd_Fever_End') {
-      //         feverEnd = note;
-      //       }
-      //       break;
-      //   }
-      //   note.timing = (beatInterval * (note.beat - x)) + t;
-      //   if (note.endBeat) note.endTiming = (beatInterval * (note.endBeat - x)) + t;
-      //   note.index = idx;
-      // });
-      // Notes = Notes.filter(note =>
-      //   ['cmd_fever_ready.wav', 'cmd_fever_start.wav', 'cmd_fever_end.wav']
-      //     .indexOf(Keysounds[note.keysound.toLowerCase()]) === -1);
-
-      // const chartData = {
-      //   bpm: Number(chart.headers.get('bpm')),
-      //   fever: {
-      //     ready: {
-      //       beat: feverReady.beat,
-      //       keysound: feverReady.keysound,
-      //       timing: feverReady.timing,
-      //     },
-      //     start: {
-      //       beat: feverStart.beat,
-      //       keysound: feverStart.keysound,
-      //       timing: feverStart.timing,
-      //     },
-      //     end: {
-      //       beat: feverEnd.beat,
-      //       keysound: feverEnd.keysound,
-      //       timing: feverEnd.timing,
-      //     },
-      //   },
-      //   notes: Notes,
-      // };
       const chartData = await bmsConverter(music, ctx.params.difficulty);
 
       await fs.outputJSON(localChartFileName, chartData);
       ctx.body = chartData;
-    // } else {
-    //   ctx.body = await fs.readJSON(localChartFileName);
-    // }
+    } else {
+      ctx.body = await fs.readJSON(localChartFileName);
+    }
   } catch (error) {
     console.log(error);
     ctx.throw(400, 'music not exists');
