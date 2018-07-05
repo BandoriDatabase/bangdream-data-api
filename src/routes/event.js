@@ -23,7 +23,8 @@ function getCurrEvent(region) {
     (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()));
   if (!currEvent) {
     currEvent = nextEvents.find(elem =>
-      (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()));
+      (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()))
+      || eventList[region].slice(-1)[0];
   }
   if (currEvent.eventType === 'challenge') {
     currEvent.detail = dbMap[region].challengeEventMap.entries[currEvent.eventId];
