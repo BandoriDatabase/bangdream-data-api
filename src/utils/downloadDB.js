@@ -4,8 +4,8 @@ import { masDBAddr } from '../config';
 
 const remoteAddr = {
   development_local: 'http://localhost:8080',
-  development: 'https://res.bangdream.ga',
-  production: 'https://res.bangdream.ga',
+  development: 'https://res.bandori.ga',
+  production: 'https://res.bandori.ga',
 };
 
 export default () => {
