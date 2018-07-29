@@ -98,8 +98,8 @@ router.get('/birthday', async (ctx, next) => {
           day: bdDate,
         },
       };
-    } else if ((bdMonth >= todayMonth && bdDate > todayDate) &&
-      (!ret.next || (bdMonth <= ret.next.birthday.month && bdDate < ret.next.birthday.day))) {
+    } else if ((bdMonth > todayMonth || (bdMonth === todayMonth && bdDate > todayDate)) &&
+      (!ret.next || bdMonth < ret.next.birthday.month || (bdMonth === todayMonth && bdDate < ret.next.birthday.day))) {
       // record it as next birthday
       ret.next = {
         chara,
