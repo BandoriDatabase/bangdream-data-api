@@ -89,4 +89,13 @@ router.get('/:id(\\d{1,4})', async (ctx, next) => {
   await next();
 });
 
+router.post('/batch', async (ctx, next) => {
+  const cardIds = ctx.request.body;
+  ctx.body = cardIds.reduce((sum, curr) => {
+    sum[curr] = cardMap[ctx.params.server][curr];
+    return sum;
+  }, {});
+  await next();
+});
+
 export default router;
