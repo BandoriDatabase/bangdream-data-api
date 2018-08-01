@@ -51,7 +51,7 @@ router.get('/model/:costumId(\\d{1,4})', async (ctx, next) => {
     const costum = live2dCostumMap[ctx.params.server][ctx.params.costumId];
     if (!costum) throw new Error();
     const live2dAsset = costum.assetBundleName;
-    const remoteLive2dBuildDataPath = `https://res.bangdream.ga/assets/live2d/chara/${live2dAsset}_buildData.json`;
+    const remoteLive2dBuildDataPath = `https://res.bandori.ga/assets/live2d/chara/${live2dAsset}_buildData.json`;
     const buildData = await (await fetch(remoteLive2dBuildDataPath)).json();
 
     ctx.body = {

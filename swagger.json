@@ -6,7 +6,7 @@
     "description": "The Public API of Bandori Database. Only for personal use, any commercial usage is strictly not allowed.",
     "contact": {
       "name": "Bandori Database Dev",
-      "email": "dev@bangdream.ga",
+      "email": "dev@bandori.ga",
       "url": "https://github.com/BandoriDatabase"
     },
     "license": {
@@ -16,7 +16,7 @@
   },
   "servers": [
     {
-      "url": "https://api.bangdream.ga/v1/",
+      "url": "https://api.bandori.ga/v1/",
       "description": "Production server"
     },
     {

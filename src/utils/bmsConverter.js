@@ -198,7 +198,7 @@ function decodeChart(bmsText) {
 }
 
 async function getRemoteBMSRaw(musicId, chartAssetBundleName, difficulty) {
-  const remoteChartFileName = `https://res.bangdream.ga/assets/musicscore/${String(musicId).padStart(3, '0')}_${chartAssetBundleName}_${difficulty}.txt`;
+  const remoteChartFileName = `https://res.bandori.ga/assets/musicscore/${String(musicId).padStart(3, '0')}_${chartAssetBundleName}_${difficulty}.txt`;
   return (await fetch(remoteChartFileName)).text();
 }
 
