@@ -36,8 +36,9 @@ router.get('/', async (ctx, next) => {
     ctx.throw(400, 'wrong query param type');
   }
   ctx.body = musicList[ctx.params.server].map(music => Object.assign({}, music, {
-    bgmFile: `/assets/sound/${music.bgmId}.mp3`,
-    jacket: `/assets/musicjacket/${music.jacketImage}_jacket.png`,
+    bgmFile: `/assets/sound/${music.bgmId}_rip/${music.bgmId}.mp3`,
+    thumb: `/assets/musicjacket/${music.jacketImage}_rip/thumb.png`,
+    jacket: `/assets/musicjacket/${music.jacketImage}_rip/jacket.png`,
     bandName: bandMap[ctx.params.server][music.bandId].bandName,
     difficulty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId).map(elem => elem.level),
     maxDifficilty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId)[1].level,
@@ -45,6 +46,10 @@ router.get('/', async (ctx, next) => {
   if (ctx.query.bandId) {
     ctx.body = ctx.body
       .filter(music => ctx.query.bandId.includes(music.bandId.toString()));
+  }
+  if (ctx.query.tag !== 'all') {
+    ctx.body = ctx.body
+      .filter(music => music.tag === ctx.query.tag);
   }
   if (ctx.query.sort && ctx.query.orderKey) {
     if (ctx.query.sort === 'asc') ctx.body = ctx.body.sort((a, b) => a[ctx.query.orderKey] - b[ctx.query.orderKey]);
@@ -69,6 +74,9 @@ router.get('/:id(\\d{1,4})', async (ctx, next) => {
     ctx.body.difficulty = musicDiffiList[ctx.params.server].filter(elem => elem.musicId === Number(ctx.params.id));
     ctx.body.combo = ctx.body.difficulty[0].combo;
     ctx.body.bandName = bandMap[ctx.params.server][ctx.body.bandId].bandName;
+    ctx.body.bgmFile = `/assets/sound/${ctx.body.bgmId}_rip/${ctx.body.bgmId}.mp3`;
+    ctx.body.thumb = `/assets/musicjacket/${ctx.body.jacketImage}_rip/thumb.png`;
+    ctx.body.jacket = `/assets/musicjacket/${ctx.body.jacketImage}_rip/jacket.png`;
   } catch (error) {
     console.log(error);
     ctx.throw(400, 'music not exists');

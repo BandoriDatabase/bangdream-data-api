@@ -1,6 +1,6 @@
 import Router from 'koa-router';
 import fetch from 'isomorphic-fetch';
-import { apiBase } from '../config';
+import { apiBase, remoteAddr } from '../config';
 
 const api = 'scenario';
 const router = new Router();
@@ -9,7 +9,7 @@ router.prefix(`${apiBase}/${api}`);
 
 router.get('/chara/:name', async (ctx, next) => {
   try {
-    const remoteScenarioPath = `https://res.bandori.ga/assets-${ctx.params.server}/characters/resourceset/Scenario${ctx.params.name}.json`;
+    const remoteScenarioPath = `${remoteAddr}/assets-${ctx.params.server}/characters/resourceset/Scenario${ctx.params.name}.json`;
     const scenarioData = await (await fetch(remoteScenarioPath)).json();
     const ret = {};
     ret.env = {

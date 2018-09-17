@@ -6,7 +6,8 @@
       "max-len": [1, 120, 2],
       "no-param-reassign": [2, { "props": false }],
       "import/no-dynamic-require": 0,
-      "global-require": 0
+      "global-require": 0,
+      "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"]
     },
     "env": {
       "mocha": true

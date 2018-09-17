@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import { remoteAddr } from '../config';
 
 // map note type
 const keyMap = {
@@ -21,6 +22,8 @@ const keyMap = {
   'fever_slide_end_a.wav': 'SlideEnd_A',
   'fever_slide_b.wav': 'Slide_B',
   'fever_slide_end_b.wav': 'SlideEnd_B',
+  'fever_note_slide_a.wav': 'Slide_A',
+  'fever_note_slide_b.wav': 'Slide_B',
 };
 
 const laneMap = {
@@ -185,8 +188,12 @@ function decodeChart(bmsText) {
   res.objects.filter(obj => obj.property === 'Slide').forEach((obj) => {
     const { effect } = obj;
     if (!isInSlide[effect.slice(-1)]) {
-      if (effect.includes('End')) console.log(effect, isInSlide);
-      obj.effect = effect.replace('Slide', 'SlideStart');
+      if (effect.includes('End')) {
+        console.log(effect, isInSlide);
+        obj.effect = effect.replace('SlideEnd', 'SlideStart');
+      } else {
+        obj.effect = effect.replace('Slide', 'SlideStart');
+      }
       isInSlide[effect.slice(-1)] = true;
     } else if (effect.includes('End')) {
       isInSlide[effect.slice(-1)] = false;
@@ -198,7 +205,7 @@ function decodeChart(bmsText) {
 }
 
 async function getRemoteBMSRaw(musicId, chartAssetBundleName, difficulty) {
-  const remoteChartFileName = `https://res.bandori.ga/assets/musicscore/${String(musicId).padStart(3, '0')}_${chartAssetBundleName}_${difficulty}.txt`;
+  const remoteChartFileName = `${remoteAddr}/assets/musicscore/${String(musicId).padStart(3, '0')}_rip/${chartAssetBundleName}_${difficulty}.txt`;
   return (await fetch(remoteChartFileName)).text();
 }
 

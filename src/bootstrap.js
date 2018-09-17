@@ -15,13 +15,20 @@ if (!process.env.ALLOW_API_KEY) {
 }
 
 // download masterdb if it is not present, then force reload
-if (
-  !fs.existsSync(masDBAddr.jp) ||
-  !fs.existsSync(masDBAddr.tw) ||
-  !fs.existsSync(masDBAddr.kr) ||
-  !fs.existsSync(masDBAddr.en)
-) {
-  console.log('no masterdb found, fetching one...');
-  global.isFirstStart = true;
-  downloadDB();
-}
+const toDL = [];
+Object.keys(masDBAddr).forEach((region) => {
+  if (!fs.existsSync(masDBAddr[region])) {
+    global.isFirstStart = true;
+    toDL.push(region);
+    console.log(`no masterdb for ${region} found, fetching one...`);
+    downloadDB(region).then(() => {
+      const idx = toDL.indexOf(region);
+      if (idx !== -1) {
+        toDL.splice(idx, 1);
+      }
+      if (!toDL.length) {
+        process.exit(1);
+      }
+    });
+  }
+});
