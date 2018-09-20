@@ -39,7 +39,7 @@ router.get('/', async (ctx, next) => {
     bgmFile: `/assets/sound/${music.bgmId}_rip/${music.bgmId}.mp3`,
     thumb: `/assets/musicjacket/${music.jacketImage}_rip/thumb.png`,
     jacket: `/assets/musicjacket/${music.jacketImage}_rip/jacket.png`,
-    bandName: bandMap[ctx.params.server][music.bandId].bandName,
+    bandName: bandMap[ctx.params.server][music.bandId] ? bandMap[ctx.params.server][music.bandId].bandName : 'Unknown',
     difficulty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId).map(elem => elem.level),
     maxDifficilty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId)[1].level,
   }));
@@ -47,7 +47,7 @@ router.get('/', async (ctx, next) => {
     ctx.body = ctx.body
       .filter(music => ctx.query.bandId.includes(music.bandId.toString()));
   }
-  if (ctx.query.tag !== 'all') {
+  if (ctx.query.tag && ctx.query.tag !== 'all') {
     ctx.body = ctx.body
       .filter(music => music.tag === ctx.query.tag);
   }
