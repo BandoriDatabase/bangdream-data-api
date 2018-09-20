@@ -1,7 +1,7 @@
 import Router from 'koa-router';
 import fs from 'fs-extra';
 import path from 'path';
-import { apiBase } from '../config';
+import { apiBase, masDBAddr } from '../config';
 import downloadDB from '../utils/downloadDB';
 
 const api = 'manage';
@@ -17,7 +17,7 @@ router.get('/reload', async (ctx) => {
   }
   // get new masterdb
   console.log('start updating masterdb');
-  downloadDB();
+  Object.keys(masDBAddr).forEach(region => downloadDB(region));
   ctx.body = 'succeed';
 });
 
