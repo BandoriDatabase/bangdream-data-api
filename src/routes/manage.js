@@ -17,7 +17,19 @@ router.get('/reload', async (ctx) => {
   }
   // get new masterdb
   console.log('start updating masterdb');
-  Object.keys(masDBAddr).forEach(region => downloadDB(region));
+  const toDL = [];
+  Object.keys(masDBAddr).forEach((region) => {
+    toDL.push(region);
+    downloadDB(region).then(() => {
+      const idx = toDL.indexOf(region);
+      if (idx !== -1) {
+        toDL.splice(idx, 1);
+      }
+      if (!toDL.length) {
+        process.exit(1);
+      }
+    });
+  });
   ctx.body = 'succeed';
 });
 
