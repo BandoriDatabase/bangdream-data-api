@@ -89,6 +89,10 @@ function decodeChart(bmsText) {
         // normal object
         objRegRes[4].match(/(..)/g).forEach((objEffect, idx, arr) => {
           if (objEffect === '00') return;
+
+          // WARN: A temp fix for black shout special
+          if (objEffect === '0S') objEffect = '03';
+
           const effect = keyEffect[objEffect];
           const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
           const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
