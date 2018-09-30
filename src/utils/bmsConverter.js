@@ -1,5 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import { remoteAddr } from '../config';
+import chartNameOverride from '../overrides/chartAssetBundleName.json';
 
 // map note type
 const keyMap = {
@@ -75,7 +76,7 @@ function decodeChart(bmsText) {
     } else if (line.startsWith('#WAV')) {
       const wavRegRes = line.match(/#WAV(.{2}) (.*\.wav)/);
       keyEffect[wavRegRes[1]] = keyMap[wavRegRes[2]] || wavRegRes[2];
-      if (wavRegRes[1] === '01') {
+      if (wavRegRes[2].indexOf('bgm') !== -1) {
         const { 2: bgm } = wavRegRes;
         res.metadata.bgm = bgm;
       }
@@ -89,7 +90,7 @@ function decodeChart(bmsText) {
         // normal object
         objRegRes[4].match(/(..)/g).forEach((objEffect, idx, arr) => {
           if (objEffect === '00') return;
-          const effect = keyEffect[objEffect];
+          const effect = keyEffect[objEffect] || 'Single';
           const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
           const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
           let property = 'Single';
@@ -110,7 +111,7 @@ function decodeChart(bmsText) {
         // long object
         objRegRes[4].match(/(..)/g).forEach((objEffect, idx, arr) => {
           if (objEffect === '00') return;
-          const effect = keyEffect[objEffect];
+          const effect = keyEffect[objEffect] || 'Single';
           const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
           const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
           let property;
@@ -139,7 +140,7 @@ function decodeChart(bmsText) {
           objRegRes[4].match(/(..)/g).forEach((objEffect, idx, arr) => {
             if (objEffect === '00') return;
 
-            const effect = keyEffect[objEffect];
+            const effect = keyEffect[objEffect] || 'Single';
             const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
             const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
             const newLen = res.objects.push({
@@ -205,7 +206,7 @@ function decodeChart(bmsText) {
 }
 
 async function getRemoteBMSRaw(musicId, chartAssetBundleName, difficulty) {
-  const remoteChartFileName = `${remoteAddr}/assets/musicscore/${String(musicId).padStart(3, '0')}_rip/${chartAssetBundleName}_${difficulty}.txt`;
+  const remoteChartFileName = `${remoteAddr}/assets/musicscore/${String(musicId).padStart(3, '0')}_rip/${chartNameOverride[chartAssetBundleName] || chartAssetBundleName}_${difficulty}.txt`;
   return (await fetch(remoteChartFileName)).text();
 }
 
