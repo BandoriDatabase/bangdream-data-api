@@ -41,7 +41,7 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
-router.get('/cardId/:cardId(\\d{1,4})', async (ctx, next) => {
+router.get('/cardId/:cardId(\\d+)', async (ctx, next) => {
   try {
     ctx.body = skillMap[ctx.params.server][ctx.params.cardId];
     ctx.body.skillDetail = skillList[ctx.params.server]
@@ -61,7 +61,7 @@ router.get('/cardId/:cardId(\\d{1,4})', async (ctx, next) => {
   }
 });
 
-router.get('/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = skillList[ctx.params.server]
       .find(skill => skill.skillId === Number(ctx.params.id));
@@ -72,7 +72,7 @@ router.get('/:id(\\d{1,4})', async (ctx, next) => {
   }
 });
 
-router.get('/cards/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/cards/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = skillMapList[ctx.params.server]
       .filter(skill => skill.skillId === Number(ctx.params.id))

@@ -63,7 +63,7 @@ router.get('/current', async (ctx, next) => {
   await next();
 });
 
-router.get('/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = gachaMap[ctx.params.server][ctx.params.id];
     ctx.body.information = gachaInformationMap[ctx.params.server][ctx.params.id];

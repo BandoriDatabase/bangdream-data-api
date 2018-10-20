@@ -37,7 +37,7 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
-router.get('/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = singleFCList[ctx.params.server].find(sfc => sfc.singleFrameCartoonId === Number(ctx.params.id));
     ctx.body.assetAddress = `/assets-${ctx.params.server}/loading/downloading_rip/${ctx.body.assetBundleName}.png`;

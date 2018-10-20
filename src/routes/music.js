@@ -68,7 +68,7 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
-router.get('/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = musicList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
     ctx.body.difficulty = musicDiffiList[ctx.params.server].filter(elem => elem.musicId === Number(ctx.params.id));
@@ -85,7 +85,7 @@ router.get('/:id(\\d{1,4})', async (ctx, next) => {
   }
 });
 
-router.get('/chart/:id(\\d{1,4})/:difficulty(\\w+)', async (ctx, next) => {
+router.get('/chart/:id(\\d+)/:difficulty(\\w+)', async (ctx, next) => {
   try {
     const music = musicList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
     const localChartFileName = path.join(

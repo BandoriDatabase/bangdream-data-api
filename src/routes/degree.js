@@ -21,7 +21,7 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
-router.get('/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = degreeMap[ctx.params.server][ctx.params.id];
   } catch (error) {

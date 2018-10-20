@@ -45,7 +45,7 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
-router.get('/badge/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/badge/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = eventBadgeList[ctx.params.server].find(elem => elem.eventId === Number(ctx.params.id));
   } catch (error) {

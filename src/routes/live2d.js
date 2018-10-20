@@ -30,7 +30,7 @@ const cardList = Object.keys(dbMap).reduce((sum, region) => {
 
 router.prefix(`${apiBase}/${api}`);
 
-router.get('/chara/:charaId(\\d{1,4})', async (ctx, next) => {
+router.get('/chara/:charaId(\\d+)', async (ctx, next) => {
   try {
     const charaLive2dVoices = live2dVoiceList[ctx.params.server]
       .filter(elem => elem.characterId === Number(ctx.params.charaId));
@@ -58,7 +58,7 @@ router.get('/chara/:charaId(\\d{1,4})', async (ctx, next) => {
   }
 });
 
-router.get('/costume/:costumeId(\\d{1,4})', async (ctx, next) => {
+router.get('/costume/:costumeId(\\d+)', async (ctx, next) => {
   try {
     const costume = live2dCostumeMap[ctx.params.server][ctx.params.costumeId];
     if (!costume) throw new Error();
@@ -71,7 +71,7 @@ router.get('/costume/:costumeId(\\d{1,4})', async (ctx, next) => {
   }
 });
 
-router.get('/model/:costumeId(\\d{1,4})', async (ctx, next) => {
+router.get('/model/:costumeId(\\d+)', async (ctx, next) => {
   try {
     const costume = live2dCostumeMap[ctx.params.server][ctx.params.costumeId];
     if (!costume) throw new Error();

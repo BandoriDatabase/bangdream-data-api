@@ -82,7 +82,7 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
-router.get('/:id(\\d{1,4})', async (ctx, next) => {
+router.get('/:id(\\d+)', async (ctx, next) => {
   const card = cardMap[ctx.params.server][ctx.params.id];
   if (card) ctx.body = addMaxParams(card);
   else ctx.throw(400, 'card not exists');
