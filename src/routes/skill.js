@@ -63,6 +63,17 @@ router.get('/cardId/:cardId(\\d{1,4})', async (ctx, next) => {
 
 router.get('/:id(\\d{1,4})', async (ctx, next) => {
   try {
+    ctx.body = skillList[ctx.params.server]
+      .find(skill => skill.skillId === Number(ctx.params.id));
+  } catch (error) {
+    ctx.throw(400, 'skill not exists');
+  } finally {
+    await next();
+  }
+});
+
+router.get('/cards/:id(\\d{1,4})', async (ctx, next) => {
+  try {
     ctx.body = skillMapList[ctx.params.server]
       .filter(skill => skill.skillId === Number(ctx.params.id))
       .map(skill => skill.cardId);
