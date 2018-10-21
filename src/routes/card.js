@@ -92,7 +92,8 @@ router.get('/:id(\\d+)', async (ctx, next) => {
 router.post('/batch', async (ctx, next) => {
   const cardIds = ctx.request.body;
   ctx.body = cardIds.reduce((sum, curr) => {
-    sum[curr] = cardMap[ctx.params.server][curr];
+    const card = cardMap[ctx.params.server][curr];
+    if (card) sum[curr] = addMaxParams(card);
     return sum;
   }, {});
   await next();
