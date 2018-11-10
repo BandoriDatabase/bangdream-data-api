@@ -30,7 +30,7 @@ router.get('/reload', async (ctx) => {
       }
     });
   });
-  ctx.body = 'succeed';
+  ctx.body = { result: 'succeed' };
 });
 
 router.delete('/musicscorecache', async (ctx) => {
@@ -39,9 +39,9 @@ router.delete('/musicscorecache', async (ctx) => {
     ctx.headers['x-api-key'] !== process.env.ALLOW_API_KEY) {
     ctx.throw(403, 'missing api key');
   }
-  // get new masterdb
+
   await fs.emptyDir(path.join(__dirname, '../../cache/musicscore/'));
-  ctx.body = 'succeed';
+  ctx.body = { result: 'succeed' };
 });
 
 export default router;

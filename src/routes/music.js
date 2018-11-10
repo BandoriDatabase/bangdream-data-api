@@ -110,4 +110,32 @@ router.get('/chart/:id(\\d+)/:difficulty(\\w+)', async (ctx, next) => {
   }
 });
 
+router.delete('/chart/:id(\\d+)/:difficulty(\\w+)', async (ctx, next) => {
+  // reject on wrong api key
+  if (!ctx.headers['x-api-key'] ||
+    ctx.headers['x-api-key'] !== process.env.ALLOW_API_KEY) {
+    ctx.throw(403, 'missing api key');
+    await next();
+    return;
+  }
+  try {
+    const music = musicList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
+    const localChartFileName = path.join(
+      __dirname,
+      '../../cache/musicscore',
+      `${music.chartAssetBundleName}_${ctx.params.difficulty}.json`,
+    );
+    if (fs.existsSync(localChartFileName)) {
+      // delete this cached file
+      await fs.remove(localChartFileName);
+      ctx.body = { result: 'succeed' };
+    }
+  } catch (error) {
+    console.log(error);
+    ctx.throw(400, 'music not exists');
+  } finally {
+    await next();
+  }
+});
+
 export default router;
