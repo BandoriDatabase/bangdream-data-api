@@ -185,12 +185,21 @@ function decodeChart(bmsText) {
     }
   });
 
-  res.objects = res.objects.sort((a, b) => a.timing - b.timing);
+  res.objects = res.objects.sort((a, b) => {
+    // check if they have same timing
+    if (a.timing === b.timing) {
+      // sort by their effect, slideEnd before other note
+      return b.effect.indexOf('SlideEnd') - a.effect.indexOf('SlideEnd');
+    }
+
+    // otherwise sort by timing
+    return a.timing - b.timing;
+  });
   res.objects.filter(obj => obj.property === 'Slide').forEach((obj) => {
     const { effect } = obj;
     if (!isInSlide[effect.slice(-1)]) {
       if (effect.includes('End')) {
-        console.log(effect, isInSlide);
+        // console.log(effect, isInSlide);
         obj.effect = effect.replace('SlideEnd', 'SlideStart');
       } else {
         obj.effect = effect.replace('Slide', 'SlideStart');
