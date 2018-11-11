@@ -24,7 +24,7 @@
   "dependencies": {
     "@koa/cors": "^2.2.1",
     "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "bms": "^2.0.0",
     "fs-extra": "^5.0.0",
@@ -39,16 +39,20 @@
     "koa2-swagger-ui": "^2.6.1"
   },
   "devDependencies": {
-    "babel-eslint": "^8.0.1",
+    "babel-eslint": "^10.0.1",
     "chai": "^4.1.2",
     "cross-env": "^5.1.1",
-    "eslint": "^4.10.0",
+    "eslint": "^5.9.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "mocha": "^4.0.1",
-    "nodemon": "^1.12.1"
+    "nodemon": "^1.18.6"
   },
   "nodemonConfig": {
-    "ignore": ["test/*", "cache/*", "data/*"]
+    "ignore": [
+      "test/*",
+      "cache/*",
+      "data/*"
+    ]
   }
 }
