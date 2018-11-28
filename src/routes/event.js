@@ -34,6 +34,8 @@ function getCurrEvent(region) {
     currEvent.detail = dbMap[region].versusEventMap.entries[currEvent.eventId];
   } else if (currEvent.eventType === 'live_try') {
     currEvent.detail = dbMap[region].liveTryEventMap.entries[currEvent.eventId];
+  } else if (currEvent.eventType === 'mission_live') {
+    currEvent.detail = dbMap[region].missionLiveEventMap.entries[currEvent.eventId];
   }
   return currEvent;
 }
