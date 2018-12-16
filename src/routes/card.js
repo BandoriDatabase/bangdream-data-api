@@ -1,25 +1,40 @@
 import Router from 'koa-router';
+import lGet from 'lodash.get';
 import { apiBase, pageLimit } from '../config';
 import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
-function addMaxParams(card) {
+function addSimpleParams(card) {
   const maxLv = Number(Object.keys(card.parameterMap).slice(-1)[0]);
+  const minLv = 1;
   return Object.assign({}, card, {
-    maxLevel: maxLv,
-    maxPerformance: card.parameterMap[maxLv].performance,
-    maxTechnique: card.parameterMap[maxLv].technique,
-    maxVisual: card.parameterMap[maxLv].visual,
-    totalMaxParam: Number(card.parameterMap[maxLv].performance) +
-      Number(card.parameterMap[maxLv].technique) +
-      Number(card.parameterMap[maxLv].visual),
+    simpleParams: {
+      min: {
+        level: minLv,
+        performance: card.parameterMap[minLv].performance,
+        technique: card.parameterMap[minLv].technique,
+        visual: card.parameterMap[minLv].visual,
+        total: Number(card.parameterMap[minLv].performance) +
+          Number(card.parameterMap[minLv].technique) +
+          Number(card.parameterMap[minLv].visual),
+      },
+      max: {
+        level: maxLv,
+        performance: card.parameterMap[maxLv].performance,
+        technique: card.parameterMap[maxLv].technique,
+        visual: card.parameterMap[maxLv].visual,
+        total: Number(card.parameterMap[maxLv].performance) +
+          Number(card.parameterMap[maxLv].technique) +
+          Number(card.parameterMap[maxLv].visual),
+      },
+    },
   });
 }
 
 const api = 'card';
 const router = new Router();
 const cardList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].cardInfos.entries).reverse().map(addMaxParams);
+  sum[region] = mapToList(dbMap[region].cardInfos.entries).reverse().map(addSimpleParams);
   return sum;
 }, {});
 const cardMap = Object.keys(dbMap).reduce((sum, region) => {
@@ -66,8 +81,8 @@ router.get('/', async (ctx, next) => {
       .filter(card => ctx.query.skill.includes(card.skill.skillId.toString()));
   }
   if (ctx.query.sort && ctx.query.orderKey) {
-    if (ctx.query.sort === 'asc') ctx.body = ctx.body.sort((a, b) => a[ctx.query.orderKey] - b[ctx.query.orderKey]);
-    else if (ctx.query.sort === 'desc') ctx.body = ctx.body.sort((a, b) => b[ctx.query.orderKey] - a[ctx.query.orderKey]);
+    if (ctx.query.sort === 'asc') ctx.body = ctx.body.sort((a, b) => lGet(a, ctx.query.orderKey) - lGet(b, ctx.query.orderKey));
+    else if (ctx.query.sort === 'desc') ctx.body = ctx.body.sort((a, b) => lGet(b, ctx.query.orderKey) - lGet(a, ctx.query.orderKey));
   }
   ctx.body = ctx.body.slice((page - 1) * limit, page * limit);
   if (!ctx.body.length) {
@@ -84,7 +99,7 @@ router.get('/', async (ctx, next) => {
 
 router.get('/:id(\\d+)', async (ctx, next) => {
   const card = cardMap[ctx.params.server][ctx.params.id];
-  if (card) ctx.body = addMaxParams(card);
+  if (card) ctx.body = addSimpleParams(card);
   else ctx.throw(400, 'card not exists');
   await next();
 });
@@ -93,7 +108,7 @@ router.post('/batch', async (ctx, next) => {
   const cardIds = ctx.request.body;
   ctx.body = cardIds.reduce((sum, curr) => {
     const card = cardMap[ctx.params.server][curr];
-    if (card) sum[curr] = addMaxParams(card);
+    if (card) sum[curr] = addSimpleParams(card);
     return sum;
   }, {});
   await next();
