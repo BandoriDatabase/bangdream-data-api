@@ -24,7 +24,9 @@ const keyMap = {
   'fever_slide_b.wav': 'Slide_B',
   'fever_slide_end_b.wav': 'SlideEnd_B',
   'fever_note_slide_a.wav': 'Slide_A',
+  'fever_note_slide_end_a.wav': 'SlideEnd_A',
   'fever_note_slide_b.wav': 'Slide_B',
+  'fever_note_slide_end_b.wav': 'SlideEnd_B',
 };
 
 const laneMap = {
@@ -185,6 +187,7 @@ function decodeChart(bmsText) {
     }
   });
 
+  let shoudlFilterOut = false;
   res.objects = res.objects.sort((a, b) => {
     // check if they have same timing
     if (a.timing === b.timing) {
@@ -194,6 +197,18 @@ function decodeChart(bmsText) {
 
     // otherwise sort by timing
     return a.timing - b.timing;
+  }).filter((obj, idx, arr) => {
+    if (idx !== arr.length - 1 && obj.timing === arr[idx + 1].timing &&
+      obj.effect === 'Flick' && arr[idx + 1].effect === 'Flick') {
+      // impossible note
+      shoudlFilterOut = true;
+      return false;
+    } else if (shoudlFilterOut) {
+      shoudlFilterOut = false;
+      return false;
+    }
+
+    return true;
   });
   res.objects.filter(obj => obj.property === 'Slide').forEach((obj) => {
     const { effect } = obj;
