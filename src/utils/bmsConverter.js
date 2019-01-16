@@ -94,7 +94,6 @@ function decodeChart(bmsText) {
           if (objEffect === '00') return;
           const effect = keyEffect[objEffect] || 'Single';
           const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
-          const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
           let property = 'Single';
           if (effect.includes('Slide')) {
             property = 'Slide';
@@ -106,7 +105,6 @@ function decodeChart(bmsText) {
             property,
             type: 'Object',
             lane: laneMap[lane],
-            timing,
           });
         });
       } else if (measureType === 5) {
@@ -115,7 +113,6 @@ function decodeChart(bmsText) {
           if (objEffect === '00') return;
           const effect = keyEffect[objEffect] || 'Single';
           const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
-          const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
           let property;
 
           if (!isInLongObj[lane]) {
@@ -132,7 +129,6 @@ function decodeChart(bmsText) {
             property,
             type: 'Object',
             lane: laneMap[lane],
-            timing,
           });
         });
       } else if (measureType === 0) {
@@ -144,13 +140,11 @@ function decodeChart(bmsText) {
 
             const effect = keyEffect[objEffect] || 'Single';
             const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
-            const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
             const newLen = res.objects.push({
               beat: objBeat,
               effect,
               property: 'Special',
               type: 'System',
-              timing,
             });
 
             if (effect === 'CmdFeverReady') {
@@ -169,59 +163,62 @@ function decodeChart(bmsText) {
             if (objEffect === '00') return;
 
             const objBeat = (measure + ((1 / arr.length) * idx)) * 4;
-            const timing = baseTiming + (((objBeat - lastBPMChangeBeat) / useBPM) * 60);
             res.objects.push({
               beat: objBeat,
               effect: 'BPMChange',
               property: 'Special',
               type: 'System',
-              timing,
               value: Number(`0x${objEffect}`),
             });
-            useBPM = Number(`0x${objEffect}`);
-            lastBPMChangeBeat = objBeat;
-            baseTiming = timing;
           });
         }
       }
     }
   });
 
-  let shoudlFilterOut = false;
+  // sort objects by beats
   res.objects = res.objects.sort((a, b) => {
-    // check if they have same timing
-    if (a.timing === b.timing) {
+    // check if they have same beat
+    if (a.beat === b.beat) {
       // sort by their effect, slideEnd before other note
       return b.effect.indexOf('SlideEnd') - a.effect.indexOf('SlideEnd');
     }
-
-    // otherwise sort by timing
-    return a.timing - b.timing;
-  }).filter((obj, idx, arr) => {
-    if (idx !== arr.length - 1 && obj.timing === arr[idx + 1].timing &&
-      obj.effect === 'Flick' && arr[idx + 1].effect === 'Flick') {
-      // impossible note
-      shoudlFilterOut = true;
-      return false;
-    } else if (shoudlFilterOut) {
-      shoudlFilterOut = false;
-      return false;
-    }
-
-    return true;
+    return a.beat - b.beat;
   });
-  res.objects.filter(obj => obj.property === 'Slide').forEach((obj) => {
-    const { effect } = obj;
-    if (!isInSlide[effect.slice(-1)]) {
-      if (effect.includes('End')) {
-        // console.log(effect, isInSlide);
-        obj.effect = effect.replace('SlideEnd', 'SlideStart');
-      } else {
-        obj.effect = effect.replace('Slide', 'SlideStart');
+
+  res.objects.forEach((obj) => {
+    // calc timing
+    const { beat, effect, property } = obj;
+    switch (property) {
+      case 'Special': {
+        const timing = baseTiming + (((beat - lastBPMChangeBeat) / useBPM) * 60);
+        obj.timing = timing;
+        if (effect === 'BPMChange') {
+          useBPM = obj.value;
+          lastBPMChangeBeat = beat;
+          baseTiming = timing;
+        }
+        break;
       }
-      isInSlide[effect.slice(-1)] = true;
-    } else if (effect.includes('End')) {
-      isInSlide[effect.slice(-1)] = false;
+      case 'Slide': {
+        const timing = baseTiming + (((beat - lastBPMChangeBeat) / useBPM) * 60);
+        obj.timing = timing;
+        if (!isInSlide[effect.slice(-1)]) {
+          if (effect.includes('End')) {
+            obj.effect = effect.replace('SlideEnd', 'SlideStart');
+          } else {
+            obj.effect = effect.replace('Slide', 'SlideStart');
+          }
+          isInSlide[effect.slice(-1)] = true;
+        } else if (effect.includes('End')) {
+          isInSlide[effect.slice(-1)] = false;
+        }
+        break;
+      }
+      default: {
+        const timing = baseTiming + (((beat - lastBPMChangeBeat) / useBPM) * 60);
+        obj.timing = timing;
+      }
     }
   });
   res.metadata.combo = res.objects.filter(obj => obj.type !== 'System').length;
