@@ -15,9 +15,11 @@ const eventBadgeList = Object.keys(dbMap).reduce((sum, region) => {
 }, {});
 
 function getCurrEvent(region) {
-  const nextEvents = eventList[region].filter(elem =>
-    (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()) ||
-    (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()))
+  const nextEvents = eventList[region]
+    .sort((a, b) => Number(a.endAt) - Number(b.endAt))
+    .filter(elem =>
+      (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()) ||
+      (Number(elem.endAt) > Date.now() && Number(elem.startAt) > Date.now()))
     || eventList[region].slice(-1)[0];
   let currEvent = nextEvents.find(elem =>
     (Number(elem.endAt) > Date.now() && Number(elem.startAt) < Date.now()));
