@@ -78,38 +78,46 @@ router.get('/birthday', async (ctx, next) => {
   // chara birthday is stored as the day in year 2000, 00:00:00 UTC+9
   // get today's date and month
   const today = new Date();
-  today.setTime(today.getTime() + (8 * 3600 * 1000));
-  const todayMonth = today.toISOString().substr(5, 2);
-  const todayDate = today.toISOString().substr(8, 2);
+  today.setFullYear(2000);
 
-  const ret = {};
-  charaList[ctx.params.server].filter(chara => chara.bandId).forEach((chara) => {
+  const ret = {
+    today: [],
+    next: [],
+  };
+  const charaBirthdayList = charaList[ctx.params.server]
+    .filter(chara => chara.bandId && Number(chara.profile.birthday) >= today.getTime() - (24 * 3600 * 1000))
+    .sort((a, b) => Number(a.profile.birthday) - Number(b.profile.birthday));
+
+  if (today.getTime() < Number(charaBirthdayList[0].profile.birthday) + (24 * 3600 * 1000)) {
+    // same birthday check
+    const allTodayCharas = charaBirthdayList.filter(chara =>
+      chara.profile.birthday === charaBirthdayList[0].profile.birthday);
+    ret.today = allTodayCharas.map((chara) => {
+      const bd = new Date(Number(chara.profile.birthday) + (9 * 3600 * 1000));
+      return {
+        chara,
+        birthday: {
+          month: bd.getMonth() + 1,
+          day: bd.getDate(),
+        },
+      };
+    });
+
+    charaBirthdayList.splice(0, allTodayCharas.length);
+  }
+
+  // same birthday check
+  const allNextCharas = charaBirthdayList.filter(chara =>
+    chara.profile.birthday === charaBirthdayList[0].profile.birthday);
+  ret.next = allNextCharas.map((chara) => {
     const bd = new Date(Number(chara.profile.birthday) + (9 * 3600 * 1000));
-    const bdMonth = bd.toISOString().substr(5, 2);
-    const bdDate = bd.toISOString().substr(8, 2);
-
-    if (bdMonth === todayMonth && bdDate === todayDate) {
-      // check if today is the birthday
-      ret.today = {
-        chara,
-        birthday: {
-          timestamp: Number(chara.profile.birthday) + (9 * 3600 * 1000),
-          month: bdMonth,
-          day: bdDate,
-        },
-      };
-    } else if ((bdMonth > todayMonth || (bdMonth === todayMonth && bdDate > todayDate)) &&
-      (!ret.next || bdMonth < ret.next.birthday.month || (bdMonth === todayMonth && bdDate < ret.next.birthday.day))) {
-      // record it as next birthday
-      ret.next = {
-        chara,
-        birthday: {
-          timestamp: Number(chara.profile.birthday) + (9 * 3600 * 1000),
-          month: bdMonth,
-          day: bdDate,
-        },
-      };
-    }
+    return {
+      chara,
+      birthday: {
+        month: bd.getMonth() + 1,
+        day: bd.getDate(),
+      },
+    };
   });
 
   ctx.body = ret;
