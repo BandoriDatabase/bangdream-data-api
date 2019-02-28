@@ -88,7 +88,8 @@ router.get('/birthday', async (ctx, next) => {
     .filter(chara => chara.bandId && Number(chara.profile.birthday) >= today.getTime() - (24 * 3600 * 1000))
     .sort((a, b) => Number(a.profile.birthday) - Number(b.profile.birthday));
 
-  if (today.getTime() < Number(charaBirthdayList[0].profile.birthday) + (24 * 3600 * 1000)) {
+  if (today.getTime() < Number(charaBirthdayList[0].profile.birthday) + (24 * 3600 * 1000) &&
+    today.getTime() > Number(charaBirthdayList[0].profile.birthday)) {
     // same birthday check
     const allTodayCharas = charaBirthdayList.filter(chara =>
       chara.profile.birthday === charaBirthdayList[0].profile.birthday);
