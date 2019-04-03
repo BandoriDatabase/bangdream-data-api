@@ -35,14 +35,7 @@ router.get('/', async (ctx, next) => {
   ) {
     ctx.throw(400, 'wrong query param type');
   }
-  ctx.body = musicList[ctx.params.server].map(music => Object.assign({}, music, {
-    bgmFile: `/assets/sound/${music.bgmId}_rip/${music.bgmId}.mp3`,
-    thumb: `/assets/musicjacket/${music.jacketImage}_rip/thumb.png`,
-    jacket: `/assets/musicjacket/${music.jacketImage}_rip/jacket.png`,
-    bandName: bandMap[ctx.params.server][music.bandId] ? bandMap[ctx.params.server][music.bandId].bandName : 'Unknown',
-    difficulty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId).map(elem => elem.level),
-    maxDifficilty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId)[1].level,
-  }));
+  ctx.body = musicList[ctx.params.server];
   if (ctx.query.bandId) {
     ctx.body = ctx.body
       .filter(music => ctx.query.bandId.includes(music.bandId.toString()));
@@ -62,7 +55,14 @@ router.get('/', async (ctx, next) => {
   } else {
     ctx.body = {
       totalCount: ctx.body.length,
-      data: ctx.body,
+      data: ctx.body.map(music => Object.assign({}, music, {
+        bgmFile: `/assets${music.musicId >= 1000 ? `-${ctx.params.server}` : ''}/sound/${music.bgmId}_rip/${music.bgmId}.mp3`,
+        thumb: `/assets${music.musicId >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${music.jacketImage}_rip/thumb.png`,
+        jacket: `/assets${music.musicId >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${music.jacketImage}_rip/jacket.png`,
+        bandName: bandMap[ctx.params.server][music.bandId] ? bandMap[ctx.params.server][music.bandId].bandName : 'Unknown',
+        difficulty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId).map(elem => elem.level),
+        maxDifficilty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId)[1].level,
+      })),
     };
   }
   await next();
@@ -74,9 +74,9 @@ router.get('/:id(\\d+)', async (ctx, next) => {
     ctx.body.difficulty = musicDiffiList[ctx.params.server].filter(elem => elem.musicId === Number(ctx.params.id));
     ctx.body.combo = ctx.body.difficulty[0].combo;
     ctx.body.bandName = bandMap[ctx.params.server][ctx.body.bandId].bandName;
-    ctx.body.bgmFile = `/assets/sound/${ctx.body.bgmId}_rip/${ctx.body.bgmId}.mp3`;
-    ctx.body.thumb = `/assets/musicjacket/${ctx.body.jacketImage}_rip/thumb.png`;
-    ctx.body.jacket = `/assets/musicjacket/${ctx.body.jacketImage}_rip/jacket.png`;
+    ctx.body.bgmFile = `/assets${Number(ctx.params.id) >= 1000 ? `-${ctx.params.server}` : ''}/sound/${ctx.body.bgmId}_rip/${ctx.body.bgmId}.mp3`;
+    ctx.body.thumb = `/assets${Number(ctx.params.id) >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${ctx.body.jacketImage}_rip/thumb.png`;
+    ctx.body.jacket = `/assets${Number(ctx.params.id) >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${ctx.body.jacketImage}_rip/jacket.png`;
   } catch (error) {
     console.log(error);
     ctx.throw(400, 'music not exists');
