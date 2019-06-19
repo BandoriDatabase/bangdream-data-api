@@ -7,6 +7,7 @@ export const masDBAddr = {
   tw: path.join(__dirname, '../data/masterdb_tw.json'),
   kr: path.join(__dirname, '../data/masterdb_kr.json'),
   en: path.join(__dirname, '../data/masterdb_en.json'),
+  cn: path.join(__dirname, '../data/masterdb_cn.json'),
 };
 const remoteAddrMap = {
   development_local: 'http://localhost:8080',
