@@ -15,5 +15,5 @@ const remoteAddrMap = {
   production: 'https://res.bandori.ga',
 };
 export const remoteAddr = remoteAddrMap[process.env.NODE_ENV];
-export const apiBase = '/v1/:server';
+export const apiBase = '/v:version(1|2)/:server';
 export const pageLimit = 9999;

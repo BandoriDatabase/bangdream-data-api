@@ -7,4 +7,6 @@ export default region => fetch(`${remoteAddr}/static/MasterDB_${region}.json`)
   .then((res) => {
     fs.writeFileSync(masDBAddr[region], res);
     console.log(`got a new ${region} masterdb`);
+  }).catch(() => {
+    console.warn(`faield to fetch ${region} masterdb`);
   });
