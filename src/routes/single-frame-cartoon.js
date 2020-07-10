@@ -20,12 +20,12 @@ router.get('/', async (ctx, next) => {
   if (ctx.params.server === 'jp') {
     ctx.body = singleFCList[ctx.params.server].map((elem) => {
       elem.assetAddress =
-        `/assets-${ctx.params.server}/comic/comic_singleframe/${elem.assetBundleName}_rip/${elem.assetBundleName}.png`;
+        `/assets/${ctx.params.server}/comic/comic_singleframe/${elem.assetBundleName}_rip/${elem.assetBundleName}.png`;
       return elem;
     });
   } else {
     ctx.body = singleFCList[ctx.params.server].map((elem) => {
-      elem.assetAddress = `/assets-${ctx.params.server}/loading/downloading_rip/${elem.assetBundleName}.png`;
+      elem.assetAddress = `/assets/${ctx.params.server}/loading/downloading_rip/${elem.assetBundleName}.png`;
       return elem;
     });
   }
@@ -40,7 +40,7 @@ router.get('/', async (ctx, next) => {
 router.get('/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = singleFCList[ctx.params.server].find(sfc => sfc.singleFrameCartoonId === Number(ctx.params.id));
-    ctx.body.assetAddress = `/assets-${ctx.params.server}/loading/downloading_rip/${ctx.body.assetBundleName}.png`;
+    ctx.body.assetAddress = `/assets/${ctx.params.server}/loading/downloading_rip/${ctx.body.assetBundleName}.png`;
   } catch (error) {
     ctx.throw(400, 'music not exists');
   } finally {

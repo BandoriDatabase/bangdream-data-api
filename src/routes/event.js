@@ -6,11 +6,11 @@ import mapToList from '../utils/mapToList';
 const api = 'event';
 const router = new Router();
 const eventList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].eventMap.entries);
+  sum[region] = mapToList(dbMap[region].masterEventMap.entries);
   return sum;
 }, {});
 const eventBadgeList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].eventBadgeMap.entries);
+  sum[region] = mapToList(dbMap[region].masterEventItemMap.entries);
   return sum;
 }, {});
 
@@ -29,15 +29,15 @@ function getCurrEvent(region) {
       || eventList[region].slice(-1)[0];
   }
   if (currEvent.eventType === 'challenge') {
-    currEvent.detail = dbMap[region].challengeEventMap.entries[currEvent.eventId];
+    currEvent.detail = dbMap[region].masterChallengeEventMap.entries[currEvent.eventId];
   } else if (currEvent.eventType === 'story') {
-    currEvent.detail = dbMap[region].storyEventMap.entries[currEvent.eventId];
+    currEvent.detail = dbMap[region].masterStoryEventMap.entries[currEvent.eventId];
   } else if (currEvent.eventType === 'versus') {
-    currEvent.detail = dbMap[region].versusEventMap.entries[currEvent.eventId];
+    currEvent.detail = dbMap[region].masterVersusEventMap.entries[currEvent.eventId];
   } else if (currEvent.eventType === 'live_try') {
-    currEvent.detail = dbMap[region].liveTryEventMap.entries[currEvent.eventId];
+    currEvent.detail = dbMap[region].masterLiveTryEventMap.entries[currEvent.eventId];
   } else if (currEvent.eventType === 'mission_live') {
-    currEvent.detail = dbMap[region].missionLiveEventMap.entries[currEvent.eventId];
+    currEvent.detail = dbMap[region].masterMissionLiveEventMap.entries[currEvent.eventId];
   }
   return currEvent;
 }

@@ -34,15 +34,15 @@ function addSimpleParams(card) {
 const api = 'card';
 const router = new Router();
 const cardList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].cardInfos.entries).reverse().map(addSimpleParams);
+  sum[region] = mapToList(dbMap[region].masterCharacterSituationMap.entries).reverse().map(addSimpleParams);
   return sum;
 }, {});
 const cardMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].cardInfos.entries;
+  sum[region] = dbMap[region].masterCharacterSituationMap.entries;
   return sum;
 }, {});
 const skillMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].skillMap.entries;
+  sum[region] = dbMap[region].masterSituationSkillMap.entries;
   return sum;
 }, {});
 

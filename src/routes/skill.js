@@ -6,26 +6,26 @@ import mapToList from '../utils/mapToList';
 const api = 'skill';
 const router = new Router();
 const skillMapList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].skillMap.entries);
+  sum[region] = mapToList(dbMap[region].masterSituationSkillMap.entries);
   return sum;
 }, {});
 const skillMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].skillMap.entries;
+  sum[region] = dbMap[region].masterSituationSkillMap.entries;
   return sum;
 }, {});
 const skillList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].skillList.entries;
+  sum[region] = dbMap[region].masterSkillList.entries;
   return sum;
 }, {});
 const skillActivateEffectList = Object.keys(dbMap).reduce((sum, region) => {
-  if (dbMap[region].skillActivateEffectList) {
-    sum[region] = dbMap[region].skillActivateEffectList.entries;
+  if (dbMap[region].masterSkillActivateEffectList) {
+    sum[region] = dbMap[region].masterSkillActivateEffectList.entries;
   }
   return sum;
 }, {});
 const skillOnceEffectList = Object.keys(dbMap).reduce((sum, region) => {
-  if (dbMap[region].skillOnceEffectList) {
-    sum[region] = dbMap[region].skillOnceEffectList.entries;
+  if (dbMap[region].masterSkillOnceEffectList) {
+    sum[region] = dbMap[region].masterSkillOnceEffectList.entries;
   }
   return sum;
 }, {});

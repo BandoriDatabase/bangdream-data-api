@@ -6,11 +6,11 @@ import mapToList from '../utils/mapToList';
 const api = 'chara';
 const router = new Router();
 const charaList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].characterInfoMap.entries);
+  sum[region] = mapToList(dbMap[region].masterCharacterInfoMap.entries);
   return sum;
 }, {});
 const charaMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].characterInfoMap.entries;
+  sum[region] = dbMap[region].masterCharacterInfoMap.entries;
   return sum;
 }, {});
 

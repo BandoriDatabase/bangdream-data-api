@@ -6,16 +6,16 @@ import mapToList from '../utils/mapToList';
 const api = 'gacha';
 const router = new Router();
 const gachaList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].gachaMap.entries).sort((a, b) => Number(a.closedAt) - Number(b.closedAt));
+  sum[region] = mapToList(dbMap[region].masterGachaMap.entries).sort((a, b) => Number(a.closedAt) - Number(b.closedAt));
   return sum;
 }, {});
 const gachaMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].gachaMap.entries;
+  sum[region] = dbMap[region].masterGachaMap.entries;
   return sum;
 }, {});
 const gachaInformationMap = Object.keys(dbMap).reduce((sum, region) => {
-  if (dbMap[region].gachaInformationMap) {
-    sum[region] = dbMap[region].gachaInformationMap.entries;
+  if (dbMap[region].masterGachaInformationMap) {
+    sum[region] = dbMap[region].masterGachaInformationMap.entries;
   }
   return sum;
 }, {});

@@ -6,11 +6,11 @@ import mapToList from '../utils/mapToList';
 const api = 'stamp';
 const router = new Router();
 const stampList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].stampMap.entries);
+  sum[region] = mapToList(dbMap[region].masterStampMap.entries);
   return sum;
 }, {});
 const stampMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].stampMap.entries;
+  sum[region] = dbMap[region].masterStampMap.entries;
   return sum;
 }, {});
 

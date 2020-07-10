@@ -9,15 +9,15 @@ import bmsConverter from '../utils/bmsConverter';
 const api = 'music';
 const router = new Router();
 const musicList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].musicList.entries.slice().reverse();
+  sum[region] = dbMap[region].masterMusicList.entries.slice().reverse();
   return sum;
 }, {});
 const musicDiffiList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].musicDifficultyList.entries;
+  sum[region] = dbMap[region].masterMusicDifficultyList.entries;
   return sum;
 }, {});
 const bandMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].bandMap.entries;
+  sum[region] = dbMap[region].masterBandMap.entries;
   return sum;
 }, {});
 

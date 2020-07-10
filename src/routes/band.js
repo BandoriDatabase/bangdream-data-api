@@ -6,7 +6,7 @@ import mapToList from '../utils/mapToList';
 const api = 'band';
 const router = new Router();
 const bandList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].bandMap.entries);
+  sum[region] = mapToList(dbMap[region].masterBandMap.entries);
   return sum;
 }, {});
 // const bandMap = {

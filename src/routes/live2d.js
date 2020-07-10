@@ -8,7 +8,7 @@ import mapToList from '../utils/mapToList';
 const api = 'live2d';
 const router = new Router();
 const live2dVoiceList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].commonsLive2dMap.entries);
+  sum[region] = mapToList(dbMap[region].masterCommonsLive2dMap.entries);
   return sum;
 }, {});
 // const live2dVoiceMap = {
@@ -16,15 +16,15 @@ const live2dVoiceList = Object.keys(dbMap).reduce((sum, region) => {
 //   tw: dbTW.commonsLive2dMap.entries,
 // };
 const live2dCostumeList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].costumeMap.entries);
+  sum[region] = mapToList(dbMap[region].masterCostumeMap.entries);
   return sum;
 }, {});
 const live2dCostumeMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].costumeMap.entries;
+  sum[region] = dbMap[region].masterCostumeMap.entries;
   return sum;
 }, {});
 const cardList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].cardInfos.entries);
+  sum[region] = mapToList(dbMap[region].masterCharacterSituationMap.entries);
   return sum;
 }, {});
 

@@ -9,7 +9,7 @@ router.prefix(`${apiBase}/${api}`);
 
 router.get('/:assetBundleName/:name', async (ctx, next) => {
   try {
-    const remoteScenarioPath = `${remoteAddr}/assets-${ctx.params.server}/characters/resourceset/${ctx.params.assetBundleName}_rip/Scenario${ctx.params.name}.json`;
+    const remoteScenarioPath = `${remoteAddr}/assets/${ctx.params.server}/characters/resourceset/${ctx.params.assetBundleName}_rip/Scenario${ctx.params.name}.json`;
     const scenarioData = await (await fetch(remoteScenarioPath)).json();
     const ret = {};
     ret.env = {

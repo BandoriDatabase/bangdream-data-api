@@ -6,11 +6,11 @@ import mapToList from '../utils/mapToList';
 const api = 'degree';
 const router = new Router();
 const degreeList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = mapToList(dbMap[region].degreeMap.entries);
+  sum[region] = mapToList(dbMap[region].masterDegreeMap.entries);
   return sum;
 }, {});
 const degreeMap = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].degreeMap.entries;
+  sum[region] = dbMap[region].masterDegreeMap.entries;
   return sum;
 }, {});
 
