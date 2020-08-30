@@ -45,6 +45,10 @@ const skillMap = Object.keys(dbMap).reduce((sum, region) => {
   sum[region] = dbMap[region].masterSituationSkillMap.entries;
   return sum;
 }, {});
+const skillList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].masterSkillList.entries;
+  return sum;
+}, {});
 
 router.prefix(`${apiBase}/${api}`);
 
@@ -61,7 +65,10 @@ router.get('/', async (ctx, next) => {
     ctx.throw(400, 'wrong query param type');
   }
   ctx.body = cardList[ctx.params.server].map(card => Object.assign({}, card, {
-    skill: skillMap[ctx.params.server][card.cardId],
+    skill: Object.assign({}, skillMap[ctx.params.server][card.situationSkillId], {
+      skillDetail: skillList[ctx.params.server]
+        .filter(skill => skill.skillId === skillMap[ctx.params.server][card.situationSkillId].skillId)[0],
+    }),
     parameterMap: undefined,
   }));
   if (ctx.query.rarity) {
@@ -97,20 +104,61 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
+router.get('/all', async (ctx, next) => {
+  if (ctx.params.version === '1') {
+    ctx.throw(410, 'API available from v2');
+  } else {
+    ctx.body = cardList[ctx.params.server].map(card => Object.assign({}, card, {
+      skill: skillMap[ctx.params.server][card.situationSkillId],
+    }));
+  }
+  await next();
+});
+
 router.get('/:id(\\d+)', async (ctx, next) => {
   const card = cardMap[ctx.params.server][ctx.params.id];
-  if (card) ctx.body = addSimpleParams(card);
-  else ctx.throw(400, 'card not exists');
+  switch (ctx.params.version) {
+    case '1':
+      if (card) ctx.body = addSimpleParams(card);
+      else ctx.throw(400, 'card not exists');
+      break;
+    case '2':
+      if (card) {
+        ctx.body = addSimpleParams(Object.assign({}, card, {
+          skill: skillMap[ctx.params.server][card.situationSkillId],
+        }));
+      } else ctx.throw(400, 'card not exists');
+      break;
+    default:
+      ctx.throw(404);
+  }
   await next();
 });
 
 router.post('/batch', async (ctx, next) => {
   const cardIds = ctx.request.body;
-  ctx.body = cardIds.reduce((sum, curr) => {
-    const card = cardMap[ctx.params.server][curr];
-    if (card) sum[curr] = addSimpleParams(card);
-    return sum;
-  }, {});
+  switch (ctx.params.version) {
+    case '1':
+      ctx.body = cardIds.reduce((sum, curr) => {
+        const card = cardMap[ctx.params.server][curr];
+        if (card) sum[curr] = addSimpleParams(card);
+        return sum;
+      }, {});
+      break;
+    case '2':
+      ctx.body = cardIds.reduce((sum, curr) => {
+        const card = cardMap[ctx.params.server][curr];
+        if (card) {
+          sum[curr] = addSimpleParams(Object.assign({}, card, {
+            skill: skillMap[ctx.params.server][card.situationSkillId],
+          }));
+        }
+        return sum;
+      }, {});
+      break;
+    default:
+      ctx.throw(404);
+  }
   await next();
 });
 

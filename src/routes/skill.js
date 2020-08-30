@@ -41,7 +41,16 @@ router.get('/', async (ctx, next) => {
   await next();
 });
 
-router.get('/cardId/:cardId(\\d+)', async (ctx, next) => {
+router.get('/:first(cardId|bycard)/:cardId(\\d+)', async (ctx, next) => {
+  if (ctx.params.first === 'cardId' && ctx.params.version !== '1') {
+    ctx.throw(410);
+    await next();
+    return;
+  } else if (ctx.params.first === 'bycard' && ctx.params.version === '1') {
+    ctx.throw(410, 'API available from v2');
+    await next();
+    return;
+  }
   try {
     ctx.body = skillMap[ctx.params.server][ctx.params.cardId];
     ctx.body.skillDetail = skillList[ctx.params.server]
@@ -63,8 +72,45 @@ router.get('/cardId/:cardId(\\d+)', async (ctx, next) => {
 
 router.get('/:id(\\d+)', async (ctx, next) => {
   try {
-    ctx.body = skillList[ctx.params.server]
-      .find(skill => skill.skillId === Number(ctx.params.id));
+    const skillId = Number(ctx.params.id);
+    switch (ctx.params.version) {
+      case '1':
+        ctx.body = skillList[ctx.params.server]
+          .find(skill => skill.skillId === skillId);
+        break;
+      case '2':
+        ctx.body = {};
+        ctx.body.skillDeteil = skillList[ctx.params.server]
+          .filter(skill => skill.skillId === skillId);
+        if (skillActivateEffectList[ctx.params.server]) {
+          ctx.body.activateEffect = skillActivateEffectList[ctx.params.server]
+            .filter(se => se.skillId === skillId);
+        }
+        if (skillOnceEffectList[ctx.params.server]) {
+          ctx.body.onceEffect = skillOnceEffectList[ctx.params.server]
+            .filter(se => se.skillId === skillId);
+        }
+        break;
+      default:
+        ctx.throw(404);
+    }
+  } catch (error) {
+    ctx.throw(400, 'skill not exists');
+  } finally {
+    await next();
+  }
+});
+
+router.get('/:id(\\d+)/cards', async (ctx, next) => {
+  if (ctx.params.version === '1') {
+    ctx.throw('API available from v2', 410);
+    await next();
+    return;
+  }
+  try {
+    ctx.body = skillMapList[ctx.params.server]
+      .filter(skill => skill.skillId === Number(ctx.params.id))
+      .map(skill => skill.situationSkillId);
   } catch (error) {
     ctx.throw(400, 'skill not exists');
   } finally {
@@ -73,10 +119,15 @@ router.get('/:id(\\d+)', async (ctx, next) => {
 });
 
 router.get('/cards/:id(\\d+)', async (ctx, next) => {
+  if (ctx.params.version !== '1') {
+    ctx.throw(410);
+    await next();
+    return;
+  }
   try {
     ctx.body = skillMapList[ctx.params.server]
       .filter(skill => skill.skillId === Number(ctx.params.id))
-      .map(skill => skill.cardId);
+      .map(skill => skill.situationSkillId);
   } catch (error) {
     ctx.throw(400, 'skill not exists');
   } finally {

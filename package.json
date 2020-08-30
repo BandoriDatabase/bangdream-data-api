@@ -1,7 +1,7 @@
 {
   "name": "bangdream-data-api",
   "version": "0.1.0",
-  "description": "Bandori Database Public API Project",
+  "description": "Bandori Top Public API Project",
   "main": "index.js",
   "directories": {
     "test": "test"

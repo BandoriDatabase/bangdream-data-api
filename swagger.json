@@ -2,11 +2,11 @@
   "openapi": "3.0.0",
   "info": {
     "version": "0.1.0",
-    "title": "Bandori Database Public API",
-    "description": "The Public API of Bandori Database. Only for personal use, any commercial usage is strictly not allowed.",
+    "title": "Bandori Top Public API",
+    "description": "The Public API of Bandori Top. Only for personal use, any commercial usage is strictly not allowed.",
     "contact": {
-      "name": "Bandori Database Dev",
-      "email": "dev@bandori.ga",
+      "name": "Bandori Top Dev",
+      "email": "dev@bandori.top",
       "url": "https://github.com/BandoriDatabase"
     },
     "license": {
@@ -16,7 +16,7 @@
   },
   "servers": [
     {
-      "url": "https://api.bandori.ga/v1/",
+      "url": "https://api.bandori.top/v1/",
       "description": "Production server"
     },
     {

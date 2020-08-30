@@ -39,6 +39,8 @@ function getCurrEvent(region) {
   } else if (currEvent.eventType === 'mission_live') {
     currEvent.detail = dbMap[region].masterMissionLiveEventMap.entries[currEvent.eventId];
   }
+
+  currEvent.eventItem = eventBadgeList[region].find(elem => elem.eventId === currEvent.eventId);
   return currEvent;
 }
 
@@ -48,6 +50,16 @@ router.get('/', async (ctx, next) => {
   ctx.body = getCurrEvent(ctx.params.server);
   await next();
 });
+
+router.get('/currid', async (ctx, next) => {
+  if (ctx.params.version === '1') {
+    ctx.throw(410, 'API available from v2');
+    await next();
+    return;
+  }
+  ctx.body = { eventId: getCurrEvent(ctx.params.server).eventId };
+  await next();
+})
 
 router.get('/badge/:id(\\d+)', async (ctx, next) => {
   try {

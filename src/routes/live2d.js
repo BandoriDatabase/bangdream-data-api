@@ -41,7 +41,7 @@ router.get('/chara/:charaId(\\d+)', async (ctx, next) => {
         const costumeCard = cardList[ctx.params.server].find(card => card.costumeId === costume.costumeId);
         if (!costumeCard) return costume;
         return Object.assign({}, costume, {
-          cardId: costumeCard.cardId,
+          situationId: costumeCard.situationId,
         });
       });
     if (!charaLive2dCostumes.length) throw new Error();
