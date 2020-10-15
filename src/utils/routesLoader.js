@@ -3,7 +3,7 @@ import glob from 'glob';
 export default function (dirname) {
   return new Promise((resolve, reject) => {
     const routes = [];
-    glob(`${dirname}/*`, {
+    glob(`${dirname}/*.js`, {
       ignore: '**/index.js',
     }, (err, files) => {
       if (err) {

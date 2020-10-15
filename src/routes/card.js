@@ -91,13 +91,14 @@ router.get('/', async (ctx, next) => {
     if (ctx.query.sort === 'asc') ctx.body = ctx.body.sort((a, b) => lGet(a, ctx.query.orderKey) - lGet(b, ctx.query.orderKey));
     else if (ctx.query.sort === 'desc') ctx.body = ctx.body.sort((a, b) => lGet(b, ctx.query.orderKey) - lGet(a, ctx.query.orderKey));
   }
+  const totalCount = ctx.body.length;
   ctx.body = ctx.body.slice((page - 1) * limit, page * limit);
   if (!ctx.body.length) {
     ctx.throw(400, 'query length exceed limit');
     ctx.body = null;
   } else {
     ctx.body = {
-      totalCount: ctx.body.length,
+      totalCount,
       data: ctx.body,
     };
   }

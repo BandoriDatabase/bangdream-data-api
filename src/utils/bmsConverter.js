@@ -227,7 +227,7 @@ function decodeChart(bmsText) {
 }
 
 async function getRemoteBMSRaw(musicId, chartAssetBundleName, difficulty) {
-  const remoteChartFileName = `${remoteAddr}/assets/musicscore/${String(musicId).padStart(3, '0')}_rip/${chartNameOverride[chartAssetBundleName] || chartAssetBundleName}_${difficulty}.txt`;
+  const remoteChartFileName = `${remoteAddr}/bandori-assets/musicscore/${String(musicId).padStart(3, '0')}_rip/${chartNameOverride[chartAssetBundleName] || chartAssetBundleName}_${difficulty}.txt`;
   return (await fetch(remoteChartFileName)).text();
 }
 

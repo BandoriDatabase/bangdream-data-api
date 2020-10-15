@@ -8,16 +8,28 @@ import bmsConverter from '../utils/bmsConverter';
 
 const api = 'music';
 const router = new Router();
-const musicList = Object.keys(dbMap).reduce((sum, region) => {
-  sum[region] = dbMap[region].masterMusicList.entries.slice().reverse();
-  return sum;
-}, {});
 const musicDiffiList = Object.keys(dbMap).reduce((sum, region) => {
   sum[region] = dbMap[region].masterMusicDifficultyList.entries;
   return sum;
 }, {});
 const bandMap = Object.keys(dbMap).reduce((sum, region) => {
   sum[region] = dbMap[region].masterBandMap.entries;
+  return sum;
+}, {});
+const musicVideoMap = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].masterMusicVideoListMap.entries;
+  return sum;
+}, {});
+const musicList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = dbMap[region].masterMusicList.entries.slice().reverse().map(music => Object.assign({}, music, {
+    musicTitle: music.musicTitle.replace('\u7505', '[FULL] ').replace('\u8e84', '[ORIG] '),
+    bgmFile: `/assets/${music.musicId >= 1000 ? `${region}` : 'jp'}/sound/${music.bgmId}_rip/${music.bgmId}.mp3`,
+    thumb: music.musicId === 273 ? '/assets/jp/musicjacket/none_rip/thumb.webp' : `/assets/${music.musicId >= 1000 ? `${region}` : 'jp'}/musicjacket/musicjacket${Math.floor(music.musicId / 10) + Number(music.musicId % 10 !== 0)}0_rip/${music.jacketImage}/thumb.webp`,
+    jacket: music.musicId === 273 ? '/assets/jp/musicjacket/none_rip/jacket.webp' : `/assets/${music.musicId >= 1000 ? `${region}` : 'jp'}/musicjacket/musicjacket${Math.floor(music.musicId / 10) + Number(music.musicId % 10 !== 0)}0_rip/${music.jacketImage}/jacket.webp`,
+    bandName: bandMap[region][music.bandId] ? bandMap[region][music.bandId].bandName : 'Unknown',
+    difficulty: musicDiffiList[region].filter(elem => elem.musicId === music.musicId).map(elem => elem.playLevel),
+    hasMV: Boolean(musicVideoMap[region][music.musicId]),
+  }));
   return sum;
 }, {});
 
@@ -42,7 +54,13 @@ router.get('/', async (ctx, next) => {
   }
   if (ctx.query.tag && ctx.query.tag !== 'all') {
     ctx.body = ctx.body
-      .filter(music => music.tag === ctx.query.tag);
+      .filter(music => music.musicDataType === ctx.query.musicDataType);
+  }
+  if (ctx.query.mv && ctx.query.mv === 'true') {
+    ctx.body = ctx.body.filter(music => music.hasMV);
+  }
+  if (ctx.query.sp && ctx.query.sp === 'true') {
+    ctx.body = ctx.body.filter(music => music.difficulty.length === 5);
   }
   if (ctx.query.sort && ctx.query.orderKey) {
     if (ctx.query.sort === 'asc') ctx.body = ctx.body.sort((a, b) => a[ctx.query.orderKey] - b[ctx.query.orderKey]);
@@ -55,14 +73,7 @@ router.get('/', async (ctx, next) => {
   } else {
     ctx.body = {
       totalCount: ctx.body.length,
-      data: ctx.body.map(music => Object.assign({}, music, {
-        bgmFile: `/assets${music.musicId >= 1000 ? `-${ctx.params.server}` : ''}/sound/${music.bgmId}_rip/${music.bgmId}.mp3`,
-        thumb: `/assets${music.musicId >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${music.jacketImage}_rip/thumb.png`,
-        jacket: `/assets${music.musicId >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${music.jacketImage}_rip/jacket.png`,
-        bandName: bandMap[ctx.params.server][music.bandId] ? bandMap[ctx.params.server][music.bandId].bandName : 'Unknown',
-        difficulty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId).map(elem => elem.level),
-        maxDifficilty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === music.musicId)[1].level,
-      })),
+      data: ctx.body,
     };
   }
   await next();
@@ -71,12 +82,11 @@ router.get('/', async (ctx, next) => {
 router.get('/:id(\\d+)', async (ctx, next) => {
   try {
     ctx.body = musicList[ctx.params.server].find(elem => elem.musicId === Number(ctx.params.id));
-    ctx.body.difficulty = musicDiffiList[ctx.params.server].filter(elem => elem.musicId === Number(ctx.params.id));
-    ctx.body.combo = ctx.body.difficulty[0].combo;
-    ctx.body.bandName = bandMap[ctx.params.server][ctx.body.bandId].bandName;
-    ctx.body.bgmFile = `/assets${Number(ctx.params.id) >= 1000 ? `-${ctx.params.server}` : ''}/sound/${ctx.body.bgmId}_rip/${ctx.body.bgmId}.mp3`;
-    ctx.body.thumb = `/assets${Number(ctx.params.id) >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${ctx.body.jacketImage}_rip/thumb.png`;
-    ctx.body.jacket = `/assets${Number(ctx.params.id) >= 1000 ? `-${ctx.params.server}` : ''}/musicjacket/${ctx.body.jacketImage}_rip/jacket.png`;
+    ctx.body = Object.assign({}, ctx.body, {
+      difficulty: musicDiffiList[ctx.params.server].filter(elem => elem.musicId === Number(ctx.params.id)),
+      notesQuantity: ctx.body.difficulty[0].notesQuantity,
+      mv: ctx.body.hasMV ? musicVideoMap[ctx.params.server][ctx.params.id].entries : undefined,
+    });
   } catch (error) {
     console.log(error);
     ctx.throw(400, 'music not exists');

@@ -3,14 +3,10 @@ import { apiBase, pageLimit } from '../config';
 import dbMap from '../db';
 import mapToList from '../utils/mapToList';
 
-const api = 'sfc';
+const api = 'ffc';
 const router = new Router();
-const singleFCList = Object.keys(dbMap).reduce((sum, region) => {
-  if (dbMap[region].masterSingleFrameCartoonList) {
-    sum[region] = dbMap[region].masterSingleFrameCartoonList.entries;
-  } else if (dbMap[region].masterSingleFrameCartoonMap) {
-    sum[region] = mapToList(dbMap[region].masterSingleFrameCartoonMap.entries);
-  }
+const fourFCList = Object.keys(dbMap).reduce((sum, region) => {
+  sum[region] = mapToList(dbMap[region].masterFourFrameCartoonMap.entries);
   return sum;
 }, {});
 
@@ -19,9 +15,9 @@ router.prefix(`${apiBase}/${api}`);
 router.get('/', async (ctx, next) => {
   switch (ctx.params.version) {
     case '1':
-      ctx.body = singleFCList[ctx.params.server].map((elem) => {
+      ctx.body = fourFCList[ctx.params.server].map((elem) => {
         elem.assetAddress =
-          `/assets/${ctx.params.server}/comic/comic_singleframe/${elem.assetBundleName}_rip/${elem.assetBundleName}.webp`;
+          `/assets/${ctx.params.server}/comic/comic_fourframe/${elem.assetBundleName}_rip/${elem.assetBundleName}.webp`;
         return elem;
       });
 
@@ -29,7 +25,6 @@ router.get('/', async (ctx, next) => {
         totalCount: ctx.body.length,
         data: ctx.body,
       };
-      await next();
       break;
     case '2': {
       const limit = ctx.query.limit || pageLimit;
@@ -45,11 +40,11 @@ router.get('/', async (ctx, next) => {
         ctx.throw(400, 'wrong query param type');
       }
 
-      ctx.body = singleFCList[ctx.params.server];
+      ctx.body = fourFCList[ctx.params.server];
       if (sort === 'desc') ctx.body = ctx.body.slice().reverse();
       ctx.body = ctx.body.slice((page - 1) * limit, page * limit).map((elem) => {
         elem.assetAddress =
-          `/assets/${ctx.params.server}/comic/comic_singleframe/${elem.assetBundleName}_rip/${elem.assetBundleName}.webp`;
+          `/assets/${ctx.params.server}/comic/comic_fourframe/${elem.assetBundleName}_rip/${elem.assetBundleName}.webp`;
         return elem;
       });
 
@@ -58,7 +53,7 @@ router.get('/', async (ctx, next) => {
         ctx.body = null;
       } else {
         ctx.body = {
-          totalCount: singleFCList[ctx.params.server].length,
+          totalCount: fourFCList[ctx.params.server].length,
           data: ctx.body,
         };
       }
@@ -67,14 +62,16 @@ router.get('/', async (ctx, next) => {
     default:
       ctx.throw(404);
   }
+
+  await next();
 });
 
 router.get('/:id(\\d+)', async (ctx, next) => {
   try {
-    ctx.body = singleFCList[ctx.params.server].find(sfc => sfc.singleFrameCartoonId === Number(ctx.params.id));
-    ctx.body.assetAddress = `/assets/${ctx.params.server}/comic/comic_singleframe/${ctx.body.assetBundleName}_rip/${ctx.body.assetBundleName}.webp`;
+    ctx.body = fourFCList[ctx.params.server].find(sfc => sfc.fourFrameCartoonId === Number(ctx.params.id));
+    ctx.body.assetAddress = `/assets/${ctx.params.server}/comic/comic_fourframe/${ctx.body.assetBundleName}_rip/${ctx.body.assetBundleName}.webp`;
   } catch (error) {
-    ctx.throw(400, 'single frame comic not exists');
+    ctx.throw(400, 'four frame comic not exists');
   } finally {
     await next();
   }

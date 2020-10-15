@@ -7,23 +7,84 @@ const router = new Router();
 
 router.prefix(`${apiBase}/${api}`);
 
+const actionType = [
+  'None', 'Talk', 'CharacerLayout', 'InputName', 'CharacterMotion',
+  'Selectable', 'SpecialEffect', 'Sound',
+];
+
+const progressType = ['Now', 'WaitFinished'];
+
+const specialEffectType = [
+  'None', 'BlackIn', 'BlackOut', 'WhiteIn', 'WhiteOut', 'ShakeScreen',
+  'ShakeWindow', 'ChangeBackground', 'Telop', 'FlashbackIn',
+  'FlashbackOut', 'ChangeCardStill', 'AmbientColorNormal',
+  'AmbientColorEvening', 'AmbientColorNight', 'PlayScenarioEffect',
+  'StopScenarioEffect', 'ChangeBackgroundStill',
+];
+
+const layoutType = ['None', 'Move', 'Apper', 'Hide', 'ShakeX', 'ShakeY'];
+
+const layoutMoveSpeedType = ['Normal', 'Fast', 'Slow'];
+
+const layoutDepthType = ['NotSet', 'Front', 'Back'];
+
+const selectableType = ['Talk', 'QuestList'];
+
 router.get('/:assetBundleName/:name', async (ctx, next) => {
   try {
-    const remoteScenarioPath = `${remoteAddr}/assets/${ctx.params.server}/characters/resourceset/${ctx.params.assetBundleName}_rip/Scenario${ctx.params.name}.json`;
+    const remoteScenarioPath = `${remoteAddr}/bandori-assets/${ctx.params.server}/characters/resourceset/${ctx.params.assetBundleName}_rip/scenario${ctx.params.name}.asset`;
     const scenarioData = await (await fetch(remoteScenarioPath)).json();
-    const ret = {};
-    ret.env = {
-      backgroundImage: `assets/${scenarioData.firstLayout.firstBackgroundBundleName}_rip/${scenarioData.firstLayout.firstBackground}.png`,
-      bgm: `assets/sound/scenario/bgm/${scenarioData.firstLayout.firstBgm.toLowerCase()}_rip/${scenarioData.firstLayout.firstBgm}.mp3`,
-    };
-    ret.talk = scenarioData.talkData.Array.map(elem => ({
-      text: elem.data.talkCharacters.body,
-      charaId: elem.data.talkCharacters.Array[0].data.characterId,
-      charaName: elem.data.talkCharacters.windowDisplayName,
-      voice: elem.data.voices.Array[0] ? `assets/sound/voice/scenario/resourceset/${ctx.params.assetBundleName}_rip/${elem.data.voices.Array[0].data.voiceId}.mp3` : null,
-    }));
+    const {
+      firstLayout, firstBgm, firstBackground, firstBackgroundBundleName, appearCharacters, needBundleNames, includeSoundDataBundleNames,
+    } = scenarioData;
 
-    ctx.body = ret;
+    const snippets = scenarioData.snippets.map((elem) => {
+      elem.progressType = progressType[elem.progressType];
+      elem.actionType = actionType[elem.actionType];
+      switch (elem.actionType) {
+        case 'Talk':
+          elem.talkData = scenarioData.talkData[elem.referenceIndex];
+          if (elem.talkData.voices.length) {
+            elem.talkData.voices = elem.talkData.voices.map(voice => Object.assign(voice, {
+              voicePath: `assets/jp/sound/voice/scenario/resourceset/${ctx.params.assetBundleName}_rip/${voice.voiceId}.mp3`,
+            }));
+          }
+          break;
+        case 'CharacerLayout':
+        case 'CharacterMotion':
+          elem.layoutData = scenarioData.layoutData[elem.referenceIndex];
+          elem.layoutData.type = layoutType[elem.layoutData.type];
+          elem.layoutData.moveSpeedType = layoutMoveSpeedType[elem.layoutData.moveSpeedType];
+          elem.layoutData.depthType = layoutDepthType[elem.layoutData.depthType];
+          break;
+        case 'Selectable':
+          elem.selectableData = scenarioData.selectableData[elem.referenceIndex];
+          elem.selectableData.type = selectableType[elem.selectableData.type];
+          break;
+        case 'SpecialEffect':
+          elem.specialEffectData = scenarioData.specialEffectData[elem.referenceIndex];
+          elem.specialEffectData.effectType = specialEffectType[elem.specialEffectData.effectType];
+          break;
+        case 'Sound':
+          elem.soundData = scenarioData.soundData[elem.referenceIndex];
+          break;
+        default:
+          break;
+      }
+      delete elem.referenceIndex;
+
+      return elem;
+    });
+
+    ctx.body = {
+      snippets,
+      firstLayout,
+      firstBgm: `assets/jp/sound/scenario/bgm/${firstBgm.toLowerCase()}_rip/${firstBgm}.mp3`,
+      firstBackground: `assets/jp/${firstBackgroundBundleName}_rip/${firstBackground}.webp`,
+      appearCharacters,
+      needBundleNames,
+      includeSoundDataBundleNames,
+    };
   } catch (error) {
     console.log(error);
     ctx.throw(400, 'scenario data not found');

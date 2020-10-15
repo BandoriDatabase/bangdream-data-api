@@ -21,10 +21,15 @@ router.get('/', async (ctx, next) => {
   // console.log(ctx.query);
   const limit = ctx.query.limit || pageLimit;
   const page = ctx.query.page || 1;
+  let sort;
+  if (ctx.params.version === '2') {
+    sort = ctx.query.sort || 'asc';
+  }
   if (Array.isArray(limit) ||
     Array.isArray(page) ||
     !Number.isInteger(Number(limit)) ||
-    !Number.isInteger(Number(page))
+    !Number.isInteger(Number(page)) ||
+    (ctx.params.version === '2' && (typeof sort !== 'string'))
   ) {
     ctx.throw(400, 'wrong query param type');
   }
@@ -32,6 +37,7 @@ router.get('/', async (ctx, next) => {
     ctx.throw(400, 'query length exceed limit');
   }
   ctx.body = stampList[ctx.params.server];
+  if (ctx.params.version === '2' && sort === 'desc') ctx.body = ctx.body.slice().reverse();
   ctx.body = {
     totalCount: ctx.body.length,
     data: ctx.body.slice((page - 1) * limit, page * limit),

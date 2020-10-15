@@ -11,8 +11,8 @@ export const masDBAddr = {
 };
 const remoteAddrMap = {
   development_local: 'http://localhost:8000',
-  development: 'https://res.bandori.ga',
-  production: 'https://res.bandori.ga',
+  development: 'https://res.bandori.top/file',
+  production: 'https://res.bandori.top/file',
 };
 export const remoteAddr = remoteAddrMap[process.env.NODE_ENV];
 export const apiBase = '/v:version(1|2)/:server';
