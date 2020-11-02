@@ -77,7 +77,7 @@ router.get('/', async (ctx, next) => {
   }
   if (ctx.query.attr) {
     ctx.body = ctx.body
-      .filter(card => ctx.query.attr.includes(card.attr));
+      .filter(card => ctx.query.attr.includes(card.attribute));
   }
   if (ctx.query.charaId) {
     ctx.body = ctx.body
