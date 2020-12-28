@@ -88,7 +88,7 @@ router.get('/birthday', async (ctx, next) => {
     .filter(chara => chara.bandId && Number(chara.profile.birthday) >= today.getTime() - (24 * 3600 * 1000))
     .sort((a, b) => Number(a.profile.birthday) - Number(b.profile.birthday));
   if (!charaBirthdayList.length) {
-    charaBirthdayList = charaList[ctx.params.server].slice(0, 1);
+    charaBirthdayList = charaList[ctx.params.server].sort((a, b) => Number(a.profile.birthday) - Number(b.profile.birthday)).slice(0, 1);
   }
 
   if (today.getTime() < Number(charaBirthdayList[0].profile.birthday) + (24 * 3600 * 1000) &&
